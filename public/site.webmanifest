@@ -1,0 +1,10 @@
+{
+  "name": "Regulars — Specialty Coffee & All-Day Brunch",
+  "short_name": "Regulars",
+  "description": "A working roastery and all-day brunch room in Alserkal Avenue, Dubai.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F7F2E9",
+  "theme_color": "#F7F2E9",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

@@ -1,0 +1,74 @@
+[
+  {
+    "path": "/essential",
+    "performance": 92,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcp": 3362.7700999999997,
+    "cls": 0,
+    "tbt": 33,
+    "fcp": 918.2567,
+    "tti": 3636.761285
+  },
+  {
+    "path": "/essential/menu",
+    "performance": 93,
+    "accessibility": 96,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcp": 3211.5408,
+    "cls": 0,
+    "tbt": 35,
+    "fcp": 911.0272,
+    "tti": 3387.0732800000005
+  },
+  {
+    "path": "/essential/visit",
+    "performance": 94,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcp": 3083.4581,
+    "cls": 0,
+    "tbt": 35,
+    "fcp": 908.8332,
+    "tti": 3230.7498000000005
+  },
+  {
+    "path": "/essential/story",
+    "performance": 93,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcp": 3294.7106999999996,
+    "cls": 0,
+    "tbt": 41,
+    "fcp": 908.4738,
+    "tti": 3409.5409949999994
+  },
+  {
+    "path": "/essential/gallery",
+    "performance": 89,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcp": 3847.473200000001,
+    "cls": 0,
+    "tbt": 55.5,
+    "fcp": 905.7366,
+    "tti": 4081.550765000001
+  },
+  {
+    "path": "/essential/specialty-coffee-al-quoz",
+    "performance": 94,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcp": 3075.9725,
+    "cls": 0,
+    "tbt": 42,
+    "fcp": 911.315,
+    "tti": 3330.9725
+  }
+]
