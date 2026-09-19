@@ -4,7 +4,7 @@ import { JsonLd } from '@/components/seo/json-ld';
 import { galleryKeys, requireImage } from '@/lib/content/images';
 import { getDictionary, type Locale } from '@/lib/i18n/dictionaries';
 import { breadcrumbSchema } from '@/lib/seo/jsonld';
-import { tierHref, type TierId } from '@/lib/config/navigation';
+import { featuresFor, tierHref, type TierId } from '@/lib/config/navigation';
 
 export function TierGalleryPage({ tier, locale }: { tier: TierId; locale: Locale }) {
   const dict = getDictionary(locale);
@@ -21,6 +21,7 @@ export function TierGalleryPage({ tier, locale }: { tier: TierId; locale: Locale
         ])}
       />
       <Hero
+        layout={featuresFor(tier).heroLayout}
         imageKey="heroGallery"
         size="short"
         locale={locale}

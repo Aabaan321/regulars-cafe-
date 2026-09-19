@@ -32,6 +32,7 @@ export default function StoryPage() {
       />
 
       <Hero
+        layout="panel"
         imageKey="heroStory"
         size="short"
         eyebrow={`Since ${new Date().getFullYear() - 2}`}

@@ -15,7 +15,7 @@ import { brand, directionsHref } from '@/lib/config/brand';
 import { getDictionary, type Locale } from '@/lib/i18n/dictionaries';
 import { faqSchema } from '@/lib/seo/jsonld';
 import { getOpenState, weeklyHoursRows } from '@/lib/utils/hours';
-import { tierHref, type TierId } from '@/lib/config/navigation';
+import { featuresFor, tierHref, type TierId } from '@/lib/config/navigation';
 
 /**
  * The Tier 2+ home page.
@@ -103,6 +103,7 @@ export function TierHomePage({ tier, locale }: { tier: TierId; locale: Locale })
       />
 
       <Hero
+        layout={featuresFor(tier).heroLayout}
         imageKey="heroHome"
         locale={locale}
         eyebrow={`${brand.address.district} · ${brand.address.city}`}

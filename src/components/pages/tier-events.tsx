@@ -10,7 +10,7 @@ import { formatPrice } from '@/lib/content/menu-display';
 import { brand } from '@/lib/config/brand';
 import { getDictionary, formatNumber, type Locale } from '@/lib/i18n/dictionaries';
 import { breadcrumbSchema, eventSchema } from '@/lib/seo/jsonld';
-import { tierHref, type TierId } from '@/lib/config/navigation';
+import { featuresFor, tierHref, type TierId } from '@/lib/config/navigation';
 
 /**
  * Events and private hire.
@@ -61,6 +61,7 @@ export async function TierEventsPage({ tier, locale }: { tier: TierId; locale: L
       ))}
 
       <Hero
+        layout={featuresFor(tier).heroLayout}
         imageKey="spaceDining"
         size="short"
         locale={locale}
@@ -164,8 +165,14 @@ export async function TierEventsPage({ tier, locale }: { tier: TierId; locale: L
         <div className="grid gap-[var(--space-xl)] lg:grid-cols-[1fr_1.2fr]">
           <dl className="flex flex-col gap-4">
             {[
-              { k: ar ? 'الفناء' : 'Courtyard', v: ar ? '٤٠ واقفاً · ٢٤ جالساً' : '40 standing · 24 seated' },
-              { k: ar ? 'المستودع كاملاً' : 'Whole warehouse', v: ar ? '٧٠ واقفاً · ٤٤ جالساً' : '70 standing · 44 seated' },
+              {
+                k: ar ? 'الفناء' : 'Courtyard',
+                v: ar ? '٤٠ واقفاً · ٢٤ جالساً' : '40 standing · 24 seated',
+              },
+              {
+                k: ar ? 'المستودع كاملاً' : 'Whole warehouse',
+                v: ar ? '٧٠ واقفاً · ٤٤ جالساً' : '70 standing · 44 seated',
+              },
               { k: ar ? 'الطاولة الطويلة' : 'The long table', v: ar ? '١٦ جالساً' : '16 seated' },
               { k: ar ? 'أقل مدة' : 'Minimum hire', v: ar ? 'ثلاث ساعات' : 'Three hours' },
             ].map((row) => (

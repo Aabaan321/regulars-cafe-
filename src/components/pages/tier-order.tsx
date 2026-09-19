@@ -4,7 +4,7 @@ import { JsonLd } from '@/components/seo/json-ld';
 import { menuCategories, itemsByCategory } from '@/lib/content/menu';
 import { pickupSlots, LEAD_MINUTES } from '@/lib/orders/pickup';
 import { breadcrumbSchema } from '@/lib/seo/jsonld';
-import { tierHref, type TierId } from '@/lib/config/navigation';
+import { featuresFor, tierHref, type TierId } from '@/lib/config/navigation';
 import type { Locale } from '@/lib/i18n/dictionaries';
 
 /**
@@ -55,6 +55,7 @@ export function TierOrderPage({ tier, locale }: { tier: TierId; locale: Locale }
       />
 
       <Hero
+        layout={featuresFor(tier).heroLayout}
         imageKey="pourOver"
         size="short"
         locale={locale}

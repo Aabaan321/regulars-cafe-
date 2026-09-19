@@ -25,6 +25,7 @@ export function TierStoryPage({ tier, locale }: { tier: TierId; locale: Locale }
       />
 
       <Hero
+        layout={featuresFor(tier).heroLayout}
         imageKey="heroStory"
         size="short"
         locale={locale}

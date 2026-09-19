@@ -3,11 +3,13 @@ import { SiteHeader } from '@/components/layout/site-header';
 import { SiteFooter } from '@/components/layout/site-footer';
 import { MobileActionBar } from '@/components/layout/mobile-action-bar';
 import { TierSwitcher } from '@/components/layout/tier-switcher';
+import { TierTheme } from '@/components/layout/tier-theme';
+import { RevealController } from '@/components/layout/reveal-controller';
 import { LanguageSwitcher } from '@/components/layout/language-switcher';
 import { JsonLd } from '@/components/seo/json-ld';
 import { cafeSchema, organizationSchema, websiteSchema } from '@/lib/seo/jsonld';
 import { getDictionary, type Locale } from '@/lib/i18n/dictionaries';
-import { tiers, type TierId } from '@/lib/config/navigation';
+import { featuresFor, tiers, type TierId } from '@/lib/config/navigation';
 
 /**
  * The chrome every tier's public pages share.
@@ -34,6 +36,8 @@ export function TierShell({
     // rule and rhythm below changes without a single page component knowing
     // which tier it is being rendered for.
     <div data-tier={tier} className="contents">
+      <TierTheme />
+      <RevealController enabled={featuresFor(tier).scrollReveal} />
       <JsonLd
         id="ld-site"
         data={[

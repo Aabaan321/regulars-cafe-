@@ -83,8 +83,13 @@
   /* ── Fluid type scale ────────────────────────────────────────────────────
      Major-third at the top end, minor-third at the bottom, so headlines get
      dramatic on a desktop without body copy ballooning. 360px → 1920px. */
-  --step--2: clamp(0.69rem, 0.67rem + 0.09vw, 0.75rem);
-  --step--1: clamp(0.83rem, 0.79rem + 0.19vw, 0.94rem);
+  /* The floor is 0.75rem (12px), not 0.69rem. Below 12px is where body copy
+     stops being readable on a phone held at arm's length, and iOS starts
+     offering to zoom the page — which then breaks the layout the zoom was
+     meant to rescue. The smallest step is a *label* size, so it may sit at
+     the floor; it may not go under it. */
+  --step--2: clamp(0.75rem, 0.73rem + 0.09vw, 0.8125rem);
+  --step--1: clamp(0.8125rem, 0.78rem + 0.16vw, 0.9375rem);
   --step-0: clamp(1rem, 0.96rem + 0.18vw, 1.125rem);
   --step-1: clamp(1.13rem, 1.05rem + 0.35vw, 1.35rem);
   --step-2: clamp(1.27rem, 1.13rem + 0.6vw, 1.75rem);
@@ -257,6 +262,27 @@
 /* ═══ Base ═══════════════════════════════════════════════════════════════ */
 
 @layer base {
+  /*
+    Horizontal overflow is clipped at `main`, not just at `body`.
+    
+    A horizontal scroller inside the page — the menu's category chips, the
+    allergen grid — propagates its layout overflow up to every non-scrolling
+    ancestor's `scrollWidth`, even though the scroller itself clips correctly
+    and the page never actually scrolls sideways. `body { overflow-x: clip }`
+    stops the scrollbar but not the propagation, and a phone browser reads
+    that inflated content width and *shrinks the page to fit it*: a 390px
+    iPhone was laying the menu out at 654px and zooming out, so every section
+    on the page was squeezed to accommodate one row of chips.
+    
+    `clip` rather than `hidden` matters. `hidden` would make `main` a scroll
+    container, which silently kills `position: sticky` for everything inside
+    it — the menu's filter bar, the allergen grid's first column. `clip`
+    truncates without creating one.
+  */
+  main {
+    overflow-x: clip;
+  }
+
   *,
   *::before,
   *::after {

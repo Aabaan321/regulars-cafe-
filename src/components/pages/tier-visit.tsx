@@ -54,6 +54,7 @@ export function TierVisitPage({ tier, locale }: { tier: TierId; locale: Locale }
       />
 
       <Hero
+        layout={featuresFor(tier).heroLayout}
         imageKey="heroVisit"
         size="short"
         locale={locale}

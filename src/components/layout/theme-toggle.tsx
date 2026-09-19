@@ -64,7 +64,11 @@ export function ThemeToggle({ dict, className = '' }: { dict: Dictionary; classN
             title={option.label}
             onClick={() => apply(option.value)}
             className={[
-              'grid size-7 place-items-center rounded-full text-[13px] transition-colors',
+              // 28px was under every tap-target guideline going. The visible pill stays
+              // small, but the hit area is padded out to 44px with a pseudo-element
+              // so the control looks the same and is actually hittable with a thumb.
+              'relative grid size-7 place-items-center rounded-full text-[13px] transition-colors',
+              'after:absolute after:top-1/2 after:left-1/2 after:size-11 after:-translate-x-1/2 after:-translate-y-1/2 after:content-[""]',
               'hover:bg-surface-raised',
               active ? 'bg-ink text-bg' : 'text-muted',
             ].join(' ')}

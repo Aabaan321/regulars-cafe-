@@ -66,7 +66,15 @@ export function MenuBrowser({
       <div className="border-line bg-bg/92 sticky top-[var(--header-h)] z-20 -mx-[var(--gutter)] border-b px-[var(--gutter)] py-3 backdrop-blur-md">
         <h2 className="sr-only">{dict.menu.filterHeading}</h2>
 
-        <div className="-mx-1 flex snap-x [scrollbar-width:none] gap-1.5 overflow-x-auto px-1 pb-1 [&::-webkit-scrollbar]:hidden">
+        {/*
+          `max-w-full min-w-0` is what stops this row widening the document.
+          `overflow-x-auto` alone does not: a flex or grid item defaults to
+          `min-width: auto`, so the box grows to fit its content and the
+          scroll never engages — the page just gets wider. On a 390px phone
+          that rendered the whole menu at 654px, every other section squeezed
+          to accommodate a row of chips.
+        */}
+        <div className="-mx-1 flex max-w-full min-w-0 snap-x [scrollbar-width:none] gap-1.5 overflow-x-auto px-1 pb-1 [&::-webkit-scrollbar]:hidden">
           <button
             type="button"
             className="chip snap-start"

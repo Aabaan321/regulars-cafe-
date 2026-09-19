@@ -13,7 +13,7 @@ import {
 } from '@/lib/content/journal';
 import { requireImage } from '@/lib/content/images';
 import { articleSchema, breadcrumbSchema } from '@/lib/seo/jsonld';
-import { tierHref, type TierId } from '@/lib/config/navigation';
+import { featuresFor, tierHref, type TierId } from '@/lib/config/navigation';
 import { formatDate, type Locale } from '@/lib/i18n/dictionaries';
 
 /**
@@ -39,6 +39,7 @@ export function TierJournalIndex({ tier, locale }: { tier: TierId; locale: Local
       />
 
       <Hero
+        layout={featuresFor(tier).heroLayout}
         imageKey="spaceShelf"
         size="short"
         locale={locale}
@@ -96,7 +97,7 @@ export function TierJournalIndex({ tier, locale }: { tier: TierId; locale: Local
                       </Link>
                     </h2>
                     <p className="prose-body measure mt-3">{ar ? post.excerptAr : post.excerpt}</p>
-                    <p className="text-faint mt-3 text-2xs">
+                    <p className="text-faint text-2xs mt-3">
                       {post.author.name} · {post.author.role}
                     </p>
                   </div>

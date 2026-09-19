@@ -55,7 +55,11 @@ export default function EssentialHome() {
         data={faqSchema(faqs.slice(0, 6).map((f) => ({ question: f.question, answer: f.answer })))}
       />
 
+      {/* Tier 1's hero is the panel composition: photograph framed, words on
+          the page's own ground in ink. Not a lesser version of the overlay
+          the paid tiers use — a different, quieter piece of art direction. */}
       <Hero
+        layout="panel"
         imageKey="heroHome"
         eyebrow={`${brand.address.district} · ${brand.address.city}`}
         heading="Come twice. You’re a regular."

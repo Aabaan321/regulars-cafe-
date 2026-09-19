@@ -47,6 +47,7 @@ export default function VisitPage() {
       />
 
       <Hero
+        layout="panel"
         imageKey="heroVisit"
         size="short"
         eyebrow={brand.address.district}

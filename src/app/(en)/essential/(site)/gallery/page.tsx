@@ -31,6 +31,7 @@ export default function GalleryPage() {
       />
 
       <Hero
+        layout="panel"
         imageKey="heroGallery"
         size="short"
         eyebrow="Photographs"

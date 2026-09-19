@@ -29,6 +29,8 @@ export function Section({
   return (
     <section
       id={id}
+      // Picked up by RevealController on Tier 2 and above; inert at Tier 1.
+      data-reveal=""
       className={[
         'section-y',
         tone === 'subtle' ? 'bg-bg-subtle' : '',

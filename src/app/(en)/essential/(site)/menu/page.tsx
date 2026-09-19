@@ -44,6 +44,7 @@ export default function MenuPage() {
       />
 
       <Hero
+        layout="panel"
         imageKey="heroMenu"
         size="short"
         eyebrow="Updated weekly"

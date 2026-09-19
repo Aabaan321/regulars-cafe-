@@ -66,6 +66,8 @@ export interface TierFeatures {
   readonly bookingFloorPlan: boolean;
   /** Menu: a full-bleed editorial spread of the signatures. */
   readonly menuShowcase: boolean;
+  /** Chrome: which hero composition the pages open with. */
+  readonly heroLayout: 'overlay' | 'panel';
   /** Chrome: sections reveal on scroll rather than simply being there. */
   readonly scrollReveal: boolean;
 }
@@ -100,6 +102,7 @@ export const tiers: Record<TierId, TierDefinition> = {
       visitRooms: false,
       bookingFloorPlan: false,
       menuShowcase: false,
+      heroLayout: 'panel',
       scrollReveal: false,
     },
   },
@@ -132,6 +135,7 @@ export const tiers: Record<TierId, TierDefinition> = {
       visitRooms: true,
       bookingFloorPlan: false,
       menuShowcase: false,
+      heroLayout: 'overlay',
       scrollReveal: true,
     },
   },
@@ -164,6 +168,7 @@ export const tiers: Record<TierId, TierDefinition> = {
       visitRooms: true,
       bookingFloorPlan: true,
       menuShowcase: true,
+      heroLayout: 'overlay',
       scrollReveal: true,
     },
   },

@@ -98,6 +98,7 @@ export async function TierMenuPage({ tier, locale }: { tier: TierId; locale: Loc
       />
 
       <Hero
+        layout={featuresFor(tier).heroLayout}
         imageKey="heroMenu"
         size="short"
         locale={locale}

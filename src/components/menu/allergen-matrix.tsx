@@ -70,7 +70,15 @@ export function AllergenMatrix({
           : 'Every dish against every allergen. Our kitchen is not nut-free or gluten-free — it is one room and everything is made in it — so treat this as information, not a guarantee.'
       }
     >
-      <div className="border-line overflow-x-auto rounded-[var(--radius-lg)] border">
+      {/*
+        `max-w-full` and `min-w-0` are load-bearing, not defensive. Without
+        them the 42rem minimum on the table propagates up through the flex and
+        grid ancestors and widens the *document*, which on a phone makes the
+        whole menu page render at 656px in a 390px viewport — every other
+        section squeezed to rescue one table. The scroll has to be trapped
+        here, in this box, and nowhere else.
+      */}
+      <div className="border-line w-full max-w-full min-w-0 overflow-x-auto overscroll-x-contain rounded-[var(--radius-lg)] border">
         <table className="w-full min-w-[42rem] border-collapse text-sm">
           <caption className="sr-only">
             {ar
@@ -135,6 +143,10 @@ export function AllergenMatrix({
           </tbody>
         </table>
       </div>
+
+      <p className="text-faint text-2xs mt-3 sm:hidden" aria-hidden="true">
+        {ar ? 'اسحب الجدول أفقياً ←' : 'Scroll the table sideways →'}
+      </p>
 
       <p className="text-faint mt-4 text-xs">
         {ar

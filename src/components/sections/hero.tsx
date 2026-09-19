@@ -6,13 +6,25 @@ import { getOpenState } from '@/lib/utils/hours';
 import type { Locale } from '@/lib/i18n/dictionaries';
 
 /**
- * The page hero.
+ * The page hero — two compositions, chosen by tier.
  *
- * The image is `priority` and sized for the viewport so it is the LCP element
- * and arrives first; the headline sits in normal document flow above it in
- * source order so a crawler and a screen reader meet the words before the
- * scenery. The overlay is a two-stop gradient rather than a flat tint, which
- * keeps contrast over the text without greying out the whole photograph.
+ * **`panel` (Tier 1).** The photograph sits in a framed block and the words
+ * sit beside it on the page's own background, in the ink colour. Nothing is
+ * overlaid. It reads as a clean, well-set editorial page — restrained on
+ * purpose, and finished rather than stripped back.
+ *
+ * **`overlay` (Tiers 2 and 3).** Full-bleed photograph, white type over it,
+ * scrims doing the contrast work. It is the more expensive-looking of the
+ * two, and it should be, because it is the more expensive tier.
+ *
+ * This is the first thing anyone sees on any page, so it is where the tiers
+ * have to diverge hardest. Before this split, Tier 1 and Tier 2 opened with
+ * the same picture, the same headline and the same layout, and a client
+ * clicking between them could not see what the money bought.
+ *
+ * In both, the image is `priority` and sized for the viewport so it is the
+ * LCP element, and the headline sits in document flow so a crawler and a
+ * screen reader meet the words before the scenery.
  */
 export function Hero({
   imageKey,
@@ -24,6 +36,7 @@ export function Hero({
   showOpenState = false,
   size = 'full',
   align = 'start',
+  layout = 'overlay',
 }: {
   imageKey: string;
   eyebrow?: string;
@@ -39,6 +52,8 @@ export function Hero({
   showOpenState?: boolean;
   size?: 'full' | 'short';
   align?: 'start' | 'center';
+  /** `panel` is Tier 1's composition; `overlay` is Tiers 2 and 3. */
+  layout?: 'overlay' | 'panel';
 }) {
   const image = requireImage(imageKey);
   const open = getOpenState(undefined, locale);
@@ -59,6 +74,88 @@ export function Hero({
         'rgba(10,7,5,0.62) 0%,' +
         'rgba(10,7,5,0.30) 40%,' +
         'transparent 70%)';
+
+  if (layout === 'panel') {
+    return (
+      <section className="bg-bg pt-[calc(var(--header-h)+var(--space-l))] pb-[var(--space-xl)]">
+        <div className="container-wide">
+          <div className="grid items-center gap-[var(--space-l)] lg:grid-cols-[1fr_1.05fr] lg:gap-[var(--space-2xl)]">
+            <div className={align === 'center' ? 'mx-auto max-w-[40rem] text-center' : ''}>
+              {eyebrow ? <p className="eyebrow mb-3">{eyebrow}</p> : null}
+
+              <h1 className="display-1 text-ink">{heading}</h1>
+
+              {lede ? <p className="lede mt-5 max-w-[36rem]">{lede}</p> : null}
+
+              {showOpenState ? (
+                <div className="border-line bg-bg-subtle mt-6 inline-flex rounded-[var(--radius-pill)] border px-3.5 py-1.5">
+                  <OpenNow
+                    initial={{
+                      status: open.status,
+                      label: open.label,
+                      detail: open.detail,
+                      exceptionLabel: open.exceptionLabel,
+                    }}
+                    locale={locale}
+                  />
+                </div>
+              ) : null}
+
+              {actions && actions.length > 0 ? (
+                <div className="mt-8 flex flex-wrap gap-3">
+                  {actions.map((action) =>
+                    action.external ? (
+                      <a
+                        key={action.label}
+                        href={action.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={
+                          action.variant === 'secondary' ? 'btn btn-lg btn-secondary' : 'btn btn-lg'
+                        }
+                      >
+                        {action.label}
+                      </a>
+                    ) : (
+                      <Link
+                        key={action.label}
+                        href={action.href}
+                        className={
+                          action.variant === 'secondary' ? 'btn btn-lg btn-secondary' : 'btn btn-lg'
+                        }
+                      >
+                        {action.label}
+                      </Link>
+                    ),
+                  )}
+                </div>
+              ) : null}
+            </div>
+
+            <div
+              className={[
+                'border-line relative overflow-hidden rounded-[var(--radius-lg)] border',
+                size === 'full' ? 'aspect-[4/3] lg:aspect-[5/4]' : 'aspect-[16/9] lg:aspect-[3/2]',
+              ].join(' ')}
+            >
+              <Image
+                src={image.src}
+                alt={image.alt}
+                fill
+                priority
+                fetchPriority="high"
+                quality={72}
+                sizes="(min-width: 1024px) 52vw, 100vw"
+                placeholder="blur"
+                blurDataURL={image.blurDataURL}
+                className="object-cover"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section
