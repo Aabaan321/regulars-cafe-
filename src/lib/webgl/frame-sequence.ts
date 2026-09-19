@@ -39,7 +39,18 @@ export class FrameSequence {
   private destroyed = false;
   private onChange: ((progress: SequenceProgress) => void) | null = null;
 
-  constructor(basePath: string, variant: string, count: number) {
+  /**
+   * `budget` caps how many of the `count` frames this device will ever fetch.
+   *
+   * The sequences are cut at the frame rate the best device deserves, and the
+   * budget is what keeps that from punishing the worst one: a desktop on wifi
+   * takes all 120, a mid-range phone on 4G takes 60, a slow connection takes
+   * 40. Because frames arrive in binary-subdivision order, a budget is not a
+   * truncation — every prefix of that order is an even sample of the whole
+   * shot, so a budgeted device gets the entire pour at a lower frame rate
+   * rather than the first third of it at full rate.
+   */
+  constructor(basePath: string, variant: string, count: number, budget = count) {
     this.count = count;
     this.urls = Array.from(
       { length: count },
@@ -47,8 +58,12 @@ export class FrameSequence {
     );
     this.images = Array.from({ length: count }, () => null);
     this.states = Array.from({ length: count }, () => 0 as FrameState);
-    this.queue = subdivisionOrder(count);
+    this.queue = subdivisionOrder(count).slice(0, Math.max(2, Math.min(budget, count)));
+    this.allowed = new Set(this.queue);
   }
+
+  /** Frames within this device's budget. Anything else is never requested. */
+  private readonly allowed: ReadonlySet<number>;
 
   /** Starts fetching. Safe to call more than once. */
   start(onChange?: (progress: SequenceProgress) => void): void {
@@ -66,6 +81,7 @@ export class FrameSequence {
   prioritise(index: number): void {
     if (this.destroyed) return;
     if (index < 0 || index >= this.count) return;
+    if (!this.allowed.has(index)) return;
     if (this.states[index] !== 0) return;
 
     const at = this.queue.indexOf(index);
@@ -104,7 +120,7 @@ export class FrameSequence {
   }
 
   get progress(): SequenceProgress {
-    return { loaded: this.loadedCount, total: this.count };
+    return { loaded: this.loadedCount, total: this.allowed.size };
   }
 
   destroy(): void {

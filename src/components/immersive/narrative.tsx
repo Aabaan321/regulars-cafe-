@@ -8,7 +8,7 @@ import {
   sectionProgress,
   useImmersive,
 } from '@/components/immersive/scroll-context';
-import { PourStage } from '@/components/immersive/pour-stage';
+import { SequenceStage } from '@/components/immersive/sequence-stage';
 import { useClientValue } from '@/lib/hooks/use-client-value';
 import type { ResolvedThumbnail } from '@/lib/content/menu-display';
 
@@ -79,7 +79,32 @@ function NarrativeBody({
 
   return (
     <>
-      <PourStage dir={dir} />
+      {/*
+        Three layers, each owning a stretch of the scroll, so something is
+        always moving rather than one shot playing for four seconds and then
+        holding for the rest of the page.
+
+          the pour    0.00 → 0.32   a cup filling from empty
+          the beans   0.30 → 0.62   the cascade it was made from
+          the room    0.60 → 0.90   a photograph of the warehouse
+
+        They overlap deliberately: each fades up while the one before it is
+        still on screen, so the narrative dissolves rather than cuts.
+      */}
+      <SequenceStage
+        sequence="pour"
+        dir={dir}
+        scrub={[0.012, 0.3]}
+        fade={[0, 0, 0.3, 0.38]}
+        priority
+      />
+      <SequenceStage
+        sequence="beans"
+        dir={dir}
+        scrub={[0.32, 0.58]}
+        fade={[0.28, 0.36, 0.58, 0.66]}
+        drift={0.06}
+      />
       <RoomPlate image={closingImage} />
 
       {mounted && profile.mode === 'webgl' ? <ArmedStage /> : null}
@@ -135,7 +160,7 @@ function RoomPlate({ image }: { image: ResolvedThumbnail }) {
     const tick = (): void => {
       const node = ref.current;
       if (node) {
-        const inward = sectionProgress(progress.current, 0.6, 0.71);
+        const inward = sectionProgress(progress.current, 0.6, 0.68);
         const outward = 1 - sectionProgress(progress.current, 0.82, 0.9);
         node.style.opacity = String(Math.min(inward, outward));
       }

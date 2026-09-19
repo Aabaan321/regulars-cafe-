@@ -24,6 +24,15 @@ export interface DeviceProfile {
   readonly maxDpr: number;
   readonly reducedMotion: boolean;
   readonly saveData: boolean;
+  /**
+   * Fraction of a frame sequence this device should fetch, 0–1.
+   *
+   * The sequences are cut at the frame rate the best device deserves. This is
+   * what stops that punishing the worst one: frames arrive in
+   * binary-subdivision order, so a fraction is an even sample of the whole
+   * shot at a lower frame rate — not the first part of it at full rate.
+   */
+  readonly frameBudget: number;
 }
 
 const FALLBACK: Omit<DeviceProfile, 'reason'> = {
@@ -32,6 +41,7 @@ const FALLBACK: Omit<DeviceProfile, 'reason'> = {
   maxDpr: 1,
   reducedMotion: false,
   saveData: false,
+  frameBudget: 0.35,
 };
 
 interface NetworkInformation {
@@ -135,6 +145,10 @@ export function detectDeviceProfile(): DeviceProfile {
     // Capped at 2 regardless: beyond that the fill cost doubles for a
     // difference nobody can see on a phone.
     maxDpr: tier === 'high' ? 2 : tier === 'medium' ? 1.75 : 1.5,
+    // A desktop on wifi takes every frame; a mid-range phone on 4G takes
+    // three fifths; anything on 3g takes a third. The pour still runs end to
+    // end on all of them — just at a lower frame rate on the slow ones.
+    frameBudget: slowNetwork ? 0.35 : tier === 'high' ? 1 : tier === 'medium' ? 0.6 : 0.45,
     reducedMotion,
     saveData,
     reason: `${forced ? 'forced · ' : ''}${tier} · ${cores} cores${memory ? ` · ${memory}GB` : ''}${slowNetwork ? ' · 3g' : ''}`,

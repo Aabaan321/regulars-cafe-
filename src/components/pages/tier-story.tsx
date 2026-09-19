@@ -7,6 +7,7 @@ import { getImage, requireImage } from '@/lib/content/images';
 import { breadcrumbSchema } from '@/lib/seo/jsonld';
 import { featuresFor, tierHref, type TierId } from '@/lib/config/navigation';
 import { TimelineSection } from '@/components/sections/story-depth';
+import { BeanBand } from '@/components/sections/bean-band';
 import type { Locale } from '@/lib/i18n/dictionaries';
 
 export function TierStoryPage({ tier, locale }: { tier: TierId; locale: Locale }) {
@@ -111,6 +112,21 @@ export function TierStoryPage({ tier, locale }: { tier: TierId; locale: Locale }
           </section>
         );
       })}
+
+      {/* Tier 2 and above: real footage of beans falling, scrubbed by the
+          band's own position on the page. Tier 1's story is words and
+          photographs, which is the right amount of story for Tier 1. */}
+      {features.storyBeanBand ? (
+        <BeanBand
+          locale={locale}
+          heading={ar ? 'أربع مزارع، وطريق واحد' : 'Four farms, one road'}
+          body={
+            ar
+              ? 'كل حبة في هذا الفنجان مرّت بيد مزارع نعرف اسمه، ومحمصة على بعد أمتار من البار. نطبع ما دفعناه على الكيس.'
+              : 'Every bean in that cup passed through the hands of a farmer we can name, and a roaster eleven metres from the bar. We print what we paid on the bag.'
+          }
+        />
+      ) : null}
 
       {features.storyTimeline ? <TimelineSection locale={locale} /> : null}
 

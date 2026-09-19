@@ -6,7 +6,7 @@ import * as THREE from 'three';
 import { sectionProgress, useImmersive } from '@/components/immersive/scroll-context';
 
 /**
- * THE BEAN JOURNEY.
+ * FOREGROUND BEANS.
  *
  * Beans drift through space along a scroll path with real depth — near ones
  * move faster and are larger, far ones hang back, which is what reads as
@@ -22,7 +22,14 @@ import { sectionProgress, useImmersive } from '@/components/immersive/scroll-con
 const SECTION_START = 0.3;
 const SECTION_END = 0.62;
 
-const COUNT_BY_TIER = { high: 140, medium: 90, low: 48 } as const;
+/*
+ * Far fewer than this used to carry. The bean chapter's background is now
+ * real footage of beans falling, so this layer's job changed: it is no longer
+ * *the* bean journey, it is a handful of beans passing close to the lens in
+ * front of it. Two dozen large, fast, near-camera beans read as depth over a
+ * filmed plate; a hundred and forty small ones read as dirt on the screen.
+ */
+const COUNT_BY_TIER = { high: 26, medium: 18, low: 10 } as const;
 
 export function BeanField({ tier }: { tier: 'high' | 'medium' | 'low' }) {
   const { progress } = useImmersive();
@@ -46,12 +53,12 @@ export function BeanField({ tier }: { tier: 'high' | 'medium' | 'low' }) {
       data.push({
         x: (random() - 0.5) * 9,
         y: (random() - 0.5) * 12,
-        // Nearer beans sit in front of the cup, far ones well behind it.
-        z: -6 + depth * 8,
+        // All of them in front of the plate now — this layer is foreground.
+        z: 0.5 + depth * 3.5,
         // Parallax: near beans travel further for the same scroll.
         speed: 0.5 + depth * 1.8,
         spin: (random() - 0.5) * 2.2,
-        scale: 0.05 + depth * 0.1,
+        scale: 0.11 + depth * 0.2,
         phase: random() * Math.PI * 2,
       });
     }

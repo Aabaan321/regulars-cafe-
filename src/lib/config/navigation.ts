@@ -56,6 +56,8 @@ export interface TierFeatures {
   readonly storyTimeline: boolean;
   /** Story: who actually works here. */
   readonly storyTeam: boolean;
+  /** Story: a scrubbed band of real beans falling. */
+  readonly storyBeanBand: boolean;
   /** Visit: getting here by metro, taxi, car and bike. */
   readonly visitTransport: boolean;
   /** Visit: step-free access, hearing loop, the honest caveats. */
@@ -97,6 +99,7 @@ export const tiers: Record<TierId, TierDefinition> = {
       menuOrdering: false,
       storyTimeline: false,
       storyTeam: false,
+      storyBeanBand: false,
       visitTransport: false,
       visitAccessibility: false,
       visitRooms: false,
@@ -130,6 +133,7 @@ export const tiers: Record<TierId, TierDefinition> = {
       menuOrdering: true,
       storyTimeline: true,
       storyTeam: true,
+      storyBeanBand: true,
       visitTransport: true,
       visitAccessibility: true,
       visitRooms: true,
@@ -163,6 +167,7 @@ export const tiers: Record<TierId, TierDefinition> = {
       menuOrdering: true,
       storyTimeline: true,
       storyTeam: true,
+      storyBeanBand: true,
       visitTransport: true,
       visitAccessibility: true,
       visitRooms: true,

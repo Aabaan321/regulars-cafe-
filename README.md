@@ -165,6 +165,19 @@ the Tier 2/3 admin dashboard, the reminder cron, and waitlist auto-notify.
 The scroll narrative is built, with the visual work split between the two
 techniques by what each is actually good at.
 
+**Two filmed sequences, not one.** A coffee pour (120 frames) carries the
+first third of the narrative; a cascade of real beans falling (72 frames)
+carries the middle, and the same bean band runs on the story page at Tier 2
+and above. Something is always moving, rather than one shot playing for four
+seconds and then holding for the rest of the page.
+
+**Frame counts are set by the best device, not the worst.** The sequences are
+cut at 120 and 72 frames; each device fetches a fraction of that set by its
+profile — a desktop on wifi takes all of them, a mid-range phone three fifths,
+anything on 3g a third. Because frames arrive in binary-subdivision order, a
+budget is an even sample of the whole shot at a lower frame rate, never the
+first part of it at full rate.
+
 **The pour is real footage.** A filmed coffee pour, cut into 72 stills and
 scrubbed against the scroll wheel — forwards as you read down, backwards as
 you read up, at the speed of your hand. A shader cannot fake crema and it is
@@ -173,9 +186,12 @@ seeks to the nearest keyframe, so a scrubbed video stutters, and iOS will not
 paint one before a user gesture. Stills are the only technique that tracks the
 wheel exactly, which is why Apple's product pages use them.
 
-**The bean field is real WebGL** — a few hundred instanced beans drifting
-through actual depth, in front of and behind the cup. That is the thing film
-cannot give you, so it is the thing three.js is kept for.
+**WebGL is now the foreground, not the subject.** The bean chapter's
+background is filmed, so the instanced layer dropped from 140 beans to about
+two dozen large ones passing close to the lens in front of the plate. That is
+what three.js is genuinely better at than film — parallax you can steer — and
+a hundred and forty small ones over a filmed background read as dirt on the
+screen rather than depth.
 
 How the sequence stays inside the performance budget:
 
