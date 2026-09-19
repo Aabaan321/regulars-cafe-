@@ -66,38 +66,41 @@ const MIXKIT_LICENCE = 'Mixkit Free Stock Video License (commercial use, no attr
 const SEQUENCES: readonly SequenceSpec[] = [
   {
     id: 'pour',
-    url: 'https://assets.mixkit.co/videos/43941/43941-1080.mp4',
-    title: 'Pouring coffee in a cup',
-    credit: 'Mixkit — https://mixkit.co/free-stock-video/pouring-coffee-in-a-cup-43941/',
+    url: 'https://assets.mixkit.co/videos/3581/3581-1080.mp4',
+    title: 'Making coffee with whipped cream',
+    credit: 'Mixkit — https://mixkit.co/free-stock-video/making-coffee-with-whipped-cream-3581/',
     licence: MIXKIT_LICENCE,
     /**
-     * The whole arc, which is the whole clip: an almost-empty white cup at
-     * 0.2s, the stream hitting bare ceramic and throwing a crown, a third
-     * full at 5s, full with settled crema at 15s.
+     * A latte being poured, close, from a steel jug into a white cup on a
+     * near-black ground.
      *
-     * An earlier cut used a beautiful side-on macro whose level barely
-     * moved, and scrubbing it felt like nothing was happening — the frames
-     * churned but the picture never changed. A scroll-scrub lives or dies on
-     * legible, monotonic transformation, not on how good any single frame is.
+     * Two earlier cuts were rejected and both for the same reason. A side-on
+     * macro had beautiful frames and a level that never moved, so scrubbing
+     * it felt like static. A top-down fill had the arc but no impact — the
+     * stream met the surface and nothing happened. This one has both: the
+     * cup fills visibly *and* the stream visibly hits, swirls and folds the
+     * crema under it, which is the moment people actually want to watch.
+     *
+     * The dark ground is not incidental either. Tier 3 runs dark, and a shot
+     * lit against black composites into that page instead of punching a
+     * bright rectangle through it.
      */
-    startSeconds: 0.2,
-    endSeconds: 15.2,
+    startSeconds: 0.1,
+    endSeconds: 4.0,
     /**
-     * 120 rather than 80.
-     *
-     * At 80 the pour was smooth on a laptop and just perceptibly stepped on
-     * a fast desktop scroll. Frames are cheap to add and the loader caps how
-     * many any given device actually fetches, so the ceiling is set by the
-     * best device rather than the worst.
+     * 96 frames across 3.9 seconds is ~24.6fps — essentially the source's own
+     * frame rate, so consecutive stills are genuinely consecutive and the
+     * motion is as smooth as the footage itself. Sampling below native rate
+     * is what made earlier cuts strobe on fast scrolls.
      */
-    frameCount: 120,
+    frameCount: 96,
     variants: [
       { id: 'wide', width: 1280, height: 720, crop: null, quality: 62 },
       {
         id: 'tall',
         width: 720,
         height: 960,
-        crop: { left: 595, top: 0, width: 810, height: 1080 },
+        crop: { left: 470, top: 0, width: 810, height: 1080 },
         quality: 64,
       },
     ],
@@ -110,15 +113,15 @@ const SEQUENCES: readonly SequenceSpec[] = [
       'Mixkit — https://mixkit.co/free-stock-video/coffee-beans-falling-into-a-coffee-pot-4985/',
     licence: MIXKIT_LICENCE,
     /**
-     * The cascade. Beans leaving the scoop and crossing the frame in the
-     * air, shot slow enough that individual beans read — which is the whole
-     * reason this is footage rather than the instanced particle field it
-     * replaces. A shader can place a thousand beans; it cannot give you the
-     * tumble and the motion blur of one real one.
+     * The cascade. Beans leaving the scoop and crossing the frame in the air,
+     * shot slow enough that individual beans read — which is the whole reason
+     * this is footage rather than the instanced particle field it replaced.
+     * A shader can place a thousand beans; it cannot give you the tumble and
+     * the motion blur of one real one.
      */
     startSeconds: 10.4,
     endSeconds: 16.6,
-    frameCount: 72,
+    frameCount: 84,
     variants: [
       { id: 'wide', width: 1280, height: 720, crop: null, quality: 60 },
       {
@@ -127,6 +130,36 @@ const SEQUENCES: readonly SequenceSpec[] = [
         height: 960,
         crop: { left: 480, top: 0, width: 810, height: 1080 },
         quality: 62,
+      },
+    ],
+  },
+  {
+    id: 'bloom',
+    url: 'https://assets.mixkit.co/videos/207/207-1080.mp4',
+    title: 'Coffee creamer swirling in coffee',
+    credit: 'Mixkit — https://mixkit.co/free-stock-video/coffee-creamer-swirling-in-coffee-207/',
+    licence: MIXKIT_LICENCE,
+    /**
+     * Cream blooming through coffee: caramel plumes, edge to edge, no subject.
+     *
+     * This is the layer that runs behind *every* Tier 3 page rather than just
+     * the home narrative, and it was chosen for what it does not have. There
+     * is no cup, no hand and no horizon to fight the text column or to look
+     * wrong at an unexpected crop, so it can sit under a menu, a booking form
+     * or a journal entry without any of them having to be laid out around it.
+     * Abstract is the requirement, not an aesthetic preference.
+     */
+    startSeconds: 1.4,
+    endSeconds: 11.0,
+    frameCount: 72,
+    variants: [
+      { id: 'wide', width: 1152, height: 648, crop: null, quality: 58 },
+      {
+        id: 'tall',
+        width: 648,
+        height: 864,
+        crop: { left: 555, top: 0, width: 810, height: 1080 },
+        quality: 60,
       },
     ],
   },

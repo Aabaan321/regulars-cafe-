@@ -29,7 +29,7 @@ export function LanguageSwitcher({ tier, locale }: { tier: TierId; locale: Local
       hrefLang={localeMeta[other].htmlLang}
       lang={localeMeta[other].htmlLang}
       dir={localeMeta[other].dir}
-      className="border-line text-muted hover:text-ink hover:bg-bg-subtle inline-flex h-8 items-center rounded-[var(--radius-pill)] border px-3 text-2xs font-bold no-underline transition-colors"
+      className="border-line text-muted hover:text-ink hover:bg-bg-subtle text-2xs inline-flex h-8 items-center rounded-[var(--radius-pill)] border px-3 font-bold no-underline transition-colors"
     >
       {localeMeta[other].nativeLabel}
     </a>

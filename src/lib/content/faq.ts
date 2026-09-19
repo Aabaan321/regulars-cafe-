@@ -16,6 +16,18 @@ export interface Faq {
   readonly answerAr: string;
   /** Used to place the question on the most relevant page. */
   readonly topics: readonly ('visit' | 'menu' | 'booking' | 'general')[];
+  /**
+   * Answers that are only true once the site can actually do the thing.
+   *
+   * Tier 1 has no reservation engine, so it must not answer "do you take
+   * reservations?" with "yes, book online" — the site would be promising
+   * something it cannot deliver, which is worse than saying nothing. Marked
+   * questions are swapped for an honest Tier 1 answer or dropped.
+   */
+  readonly needsBooking?: boolean;
+  /** The Tier 1 answer, where the truth differs rather than the question. */
+  readonly answerWithoutBooking?: string;
+  readonly answerWithoutBookingAr?: string;
 }
 
 export const faqs: readonly Faq[] = [
@@ -27,6 +39,11 @@ export const faqs: readonly Faq[] = [
     answerAr:
       'نعم، لمجموعات من شخص إلى ثمانية أشخاص، وحتى ٣٠ يوماً مقدماً. عطلة نهاية الأسبوع بين التاسعة والواحدة تُحجز قبل أيام، لذا احجز مبكراً إن أردت طاولة عند النافذة. لتسعة أشخاص فأكثر، استخدم نموذج الحجز الخاص.',
     topics: ['booking', 'visit'],
+    needsBooking: true,
+    answerWithoutBooking:
+      'Not online. Call us or send a WhatsApp and we will hold a table if we can — weekends between 9am and 1pm we usually cannot, so come early or come late. Walk-ins are always welcome and we keep part of the room for them.',
+    answerWithoutBookingAr:
+      'ليس عبر الإنترنت. اتصل بنا أو راسلنا على واتساب وسنحجز لك طاولة إن أمكن — وفي عطلة نهاية الأسبوع بين التاسعة والواحدة غالباً لا نستطيع، فتعال مبكراً أو متأخراً. الزوار بلا حجز مرحب بهم دائماً ونحتفظ لهم بجزء من المكان.',
   },
   {
     question: 'Where exactly are you, and is there parking?',
@@ -106,9 +123,34 @@ export const faqs: readonly Faq[] = [
     answerAr:
       'نعم. يتسع الفناء لـ ٤٠ شخصاً واقفاً أو ٢٤ جالساً، ويستوعب المستودع بالكامل ٧٠ شخصاً واقفاً. ننظّم إطلاقات المنتجات وجلسات التذوق والعشاءات الخاصة وأحياناً برانش الأعراس. يُطبّق حد أدنى للإنفاق في عطلة نهاية الأسبوع — أرسل نموذج الحجز الخاص وسنعود إليك خلال يوم بأرقام واضحة.',
     topics: ['booking', 'general'],
+    needsBooking: true,
+    answerWithoutBooking:
+      'Yes — call us and we will talk it through. The courtyard seats forty standing and the whole room takes seventy. We do not take event enquiries through this site, so the phone is the fastest way.',
+    answerWithoutBookingAr:
+      'نعم — اتصل بنا ولنتحدث في التفاصيل. يتسع الفناء لأربعين واقفاً والمكان كله لسبعين. لا نستقبل طلبات الفعاليات عبر هذا الموقع، لذا الهاتف أسرع وسيلة.',
   },
 ];
 
 export function faqsFor(topic: Faq['topics'][number]): readonly Faq[] {
   return faqs.filter((f) => f.topics.includes(topic));
+}
+
+/**
+ * The questions a given tier can honestly answer.
+ *
+ * Tier 1 gets the walk-in answer where the booking answer would be a lie,
+ * and the `cafeSchema` `acceptsReservations` flag is already tier-aware for
+ * the same reason — the structured data and the visible copy have to agree.
+ */
+export function faqsHonestFor(canBook: boolean): readonly Faq[] {
+  if (canBook) return faqs;
+  return faqs.map((faq) =>
+    faq.needsBooking && faq.answerWithoutBooking
+      ? {
+          ...faq,
+          answer: faq.answerWithoutBooking,
+          answerAr: faq.answerWithoutBookingAr ?? faq.answerAr,
+        }
+      : faq,
+  );
 }

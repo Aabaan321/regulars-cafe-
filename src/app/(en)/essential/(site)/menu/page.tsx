@@ -53,7 +53,11 @@ export default function MenuPage() {
       />
 
       <div className="container-page pt-[var(--space-xl)] pb-[var(--section-y)]">
-        <MenuBrowser categories={categories} dict={dict} showImages />
+        {/* No photographs at Tier 1. A clean, well-set list of names, descriptions
+          and prices is what a menu actually is, and it is the single clearest
+          signal on the page that this is the restrained tier — the photo-led
+          cards start at Signature. */}
+        <MenuBrowser categories={categories} dict={dict} showFilters={false} />
       </div>
     </>
   );

@@ -25,13 +25,26 @@ export function MenuBrowser({
   categories,
   dict,
   locale = 'en',
-  showImages = true,
+  showImages = false,
+  showFilters = true,
   renderAction,
 }: {
   categories: readonly MenuCategoryView[];
   dict: Dictionary;
   locale?: Locale;
+  /**
+   * Photographs on the rows. Off by default: Tier 1's menu is a well-set
+   * list of names, descriptions and prices, which is what a menu is. The
+   * photo-led presentation starts at Signature and is the clearest
+   * difference between the two on the page clients look at most.
+   */
   showImages?: boolean;
+  /**
+   * The sticky category and dietary chips. On at Tier 2, off at Tier 1 —
+   * a printed menu does not have filters, and the whole point of Essential
+   * is that it reads like a menu rather than like an app.
+   */
+  showFilters?: boolean;
   renderAction?: (item: MenuItemView) => React.ReactNode;
 }) {
   const [activeCategory, setActiveCategory] = useState<string>('all');
@@ -63,10 +76,11 @@ export function MenuBrowser({
 
   return (
     <div>
-      <div className="border-line bg-bg/92 sticky top-[var(--header-h)] z-20 -mx-[var(--gutter)] border-b px-[var(--gutter)] py-3 backdrop-blur-md">
-        <h2 className="sr-only">{dict.menu.filterHeading}</h2>
+      {showFilters ? (
+        <div className="border-line bg-bg/92 sticky top-[var(--header-h)] z-20 -mx-[var(--gutter)] border-b px-[var(--gutter)] py-3 backdrop-blur-md">
+          <h2 className="sr-only">{dict.menu.filterHeading}</h2>
 
-        {/*
+          {/*
           `max-w-full min-w-0` is what stops this row widening the document.
           `overflow-x-auto` alone does not: a flex or grid item defaults to
           `min-width: auto`, so the box grows to fit its content and the
@@ -74,60 +88,61 @@ export function MenuBrowser({
           that rendered the whole menu at 654px, every other section squeezed
           to accommodate a row of chips.
         */}
-        <div className="-mx-1 flex max-w-full min-w-0 snap-x [scrollbar-width:none] gap-1.5 overflow-x-auto px-1 pb-1 [&::-webkit-scrollbar]:hidden">
-          <button
-            type="button"
-            className="chip snap-start"
-            aria-pressed={activeCategory === 'all'}
-            onClick={() => setActiveCategory('all')}
-          >
-            {dict.menu.all}
-          </button>
-          {categories.map((category) => (
+          <div className="-mx-1 flex max-w-full min-w-0 snap-x [scrollbar-width:none] gap-1.5 overflow-x-auto px-1 pb-1 [&::-webkit-scrollbar]:hidden">
             <button
-              key={category.id}
               type="button"
-              className="chip snap-start whitespace-nowrap"
-              aria-pressed={activeCategory === category.id}
-              onClick={() => setActiveCategory(category.id)}
+              className="chip snap-start"
+              aria-pressed={activeCategory === 'all'}
+              onClick={() => setActiveCategory('all')}
             >
-              {category.name}
+              {dict.menu.all}
             </button>
-          ))}
-        </div>
-
-        {availableDiets.length > 0 ? (
-          <div className="mt-2 flex flex-wrap items-center gap-1.5">
-            <span className="text-faint text-2xs me-1 font-bold tracking-wide uppercase">
-              {dict.menu.dietaryHeading}
-            </span>
-            {availableDiets.map((tag) => (
+            {categories.map((category) => (
               <button
-                key={tag}
+                key={category.id}
                 type="button"
-                className="chip"
-                aria-pressed={diets.includes(tag)}
-                onClick={() => toggleDiet(tag)}
+                className="chip snap-start whitespace-nowrap"
+                aria-pressed={activeCategory === category.id}
+                onClick={() => setActiveCategory(category.id)}
               >
-                {dietaryLabels[tag][locale]}
+                {category.name}
               </button>
             ))}
-            {diets.length > 0 ? (
-              <button
-                type="button"
-                className="text-accent text-2xs ms-1 font-bold underline"
-                onClick={() => setDiets([])}
-              >
-                {dict.menu.clearFilters}
-              </button>
-            ) : null}
           </div>
-        ) : null}
 
-        <p aria-live="polite" className="sr-only">
-          {fill(dict.menu.itemsCount, { count: total }, locale)}
-        </p>
-      </div>
+          {availableDiets.length > 0 ? (
+            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+              <span className="text-faint text-2xs me-1 font-bold tracking-wide uppercase">
+                {dict.menu.dietaryHeading}
+              </span>
+              {availableDiets.map((tag) => (
+                <button
+                  key={tag}
+                  type="button"
+                  className="chip"
+                  aria-pressed={diets.includes(tag)}
+                  onClick={() => toggleDiet(tag)}
+                >
+                  {dietaryLabels[tag][locale]}
+                </button>
+              ))}
+              {diets.length > 0 ? (
+                <button
+                  type="button"
+                  className="text-accent text-2xs ms-1 font-bold underline"
+                  onClick={() => setDiets([])}
+                >
+                  {dict.menu.clearFilters}
+                </button>
+              ) : null}
+            </div>
+          ) : null}
+
+          <p aria-live="polite" className="sr-only">
+            {fill(dict.menu.itemsCount, { count: total }, locale)}
+          </p>
+        </div>
+      ) : null}
 
       {filtered.length === 0 ? (
         <div className="border-line bg-bg-subtle mt-10 rounded-[var(--radius-lg)] border border-dashed p-10 text-center">

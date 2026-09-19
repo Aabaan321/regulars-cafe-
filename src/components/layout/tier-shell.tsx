@@ -5,6 +5,7 @@ import { MobileActionBar } from '@/components/layout/mobile-action-bar';
 import { TierSwitcher } from '@/components/layout/tier-switcher';
 import { TierTheme } from '@/components/layout/tier-theme';
 import { RevealController } from '@/components/layout/reveal-controller';
+import { PageAtmosphere } from '@/components/layout/page-atmosphere';
 import { LanguageSwitcher } from '@/components/layout/language-switcher';
 import { JsonLd } from '@/components/seo/json-ld';
 import { cafeSchema, organizationSchema, websiteSchema } from '@/lib/seo/jsonld';
@@ -38,6 +39,7 @@ export function TierShell({
     <div data-tier={tier} className="contents">
       <TierTheme />
       <RevealController enabled={featuresFor(tier).scrollReveal} />
+      <PageAtmosphere tier={tier} dir={locale === 'ar' ? 'rtl' : 'ltr'} />
       <JsonLd
         id="ld-site"
         data={[

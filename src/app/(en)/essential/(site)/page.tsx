@@ -8,7 +8,11 @@ import { InstagramGrid } from '@/components/sections/instagram-grid';
 import { FaqAccordion } from '@/components/sections/faq-accordion';
 import { OpenNow } from '@/components/ui/open-now';
 import { JsonLd } from '@/components/seo/json-ld';
-import { faqs } from '@/lib/content/faq';
+import { faqsHonestFor } from '@/lib/content/faq';
+
+/* Tier 1 has no reservation engine, so it must not answer "do you take
+   reservations?" with "yes, book online". */
+const faqs = faqsHonestFor(false);
 import { founder, storyIntro } from '@/lib/content/story';
 import { getImage, requireImage } from '@/lib/content/images';
 import { menuItems } from '@/lib/content/menu';

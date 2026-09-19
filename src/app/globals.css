@@ -161,6 +161,81 @@
    actually separates a competent small site from an expensive one. Colour is
    held constant on purpose: it is the same café at every tier.               */
 
+/* ── The atmosphere layer ────────────────────────────────────────────────
+   Tier 2 and 3 run a warm moving plate behind the whole site. For it to be
+   visible at all, the page's own surfaces have to stop being opaque — so at
+   those tiers `body` goes transparent and the section tones become
+   translucent, letting the plate read through as depth rather than as a
+   picture behind a wall.
+
+   The veil colours are tier-specific because the plate is: Tier 3's is
+   moving and needs holding back harder than Tier 2's single still frame.  */
+
+[data-tier='signature'],
+[data-tier='immersive'] {
+  --atmosphere-veil-a: color-mix(in oklab, var(--c-bg) 74%, transparent);
+  --atmosphere-veil-b: color-mix(in oklab, var(--c-bg) 88%, transparent);
+}
+
+[data-tier='immersive'] {
+  --atmosphere-veil-a: color-mix(in oklab, var(--c-bg) 52%, transparent);
+  --atmosphere-veil-b: color-mix(in oklab, var(--c-bg) 76%, transparent);
+}
+
+/*
+   The plate is fixed at a negative z-index, which paints it above `body`'s
+   background and below everything in flow. So `body` keeps its colour — the
+   page is never left on a bare white canvas — and what has to give is the
+   *sections*, which go translucent rather than transparent.
+
+   The distinction matters: the plate should read as depth behind the page,
+   not as a picture the text is floating on top of. `data-tier` sits inside
+   `body`, so these select upwards with `:has()`.
+*/
+body:has([data-tier='signature']) .bg-bg,
+body:has([data-tier='immersive']) .bg-bg {
+  background-color: color-mix(in oklab, var(--c-bg) 68%, transparent);
+}
+
+body:has([data-tier='signature']) .bg-bg-subtle,
+body:has([data-tier='immersive']) .bg-bg-subtle {
+  background-color: color-mix(in oklab, var(--c-bg-subtle) 64%, transparent);
+}
+
+/* Cards keep their own surface — a translucent card over a moving plate is
+   where text contrast actually starts to fail. */
+body:has([data-tier='signature']) .card,
+body:has([data-tier='immersive']) .card {
+  background-color: color-mix(in oklab, var(--c-surface) 94%, transparent);
+  backdrop-filter: blur(6px);
+}
+
+@utility atmosphere-surface {
+  background-color: color-mix(in oklab, var(--c-bg) 88%, transparent);
+}
+
+/* A slow drift on Tier 2's single frame: the same warmth as Tier 3's
+   sequence for none of the bytes. Paused for anyone who asked for less
+   movement. */
+@keyframes atmosphere-drift {
+  0% {
+    transform: scale(1.06) translate3d(0, 0, 0);
+  }
+  100% {
+    transform: scale(1.14) translate3d(-1.2%, -1.6%, 0);
+  }
+}
+
+.atmosphere-drift {
+  animation: atmosphere-drift 48s var(--ease-in-out-soft) infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atmosphere-drift {
+    animation: none;
+  }
+}
+
 /* ── Tier 1 · Essential — quiet, tight, honest ───────────────────────────
    Restrained by design, not by neglect. Smaller display sizes, a compact
    vertical rhythm, near-square corners and almost no shadow: the look of a
@@ -173,7 +248,12 @@
   --step-7: clamp(1.9rem, 1.4rem + 2.2vw, 3.9rem);
 
   --section-y: clamp(2.75rem, 2rem + 3.2vw, 5rem);
-  --content-max: 68rem;
+  /* Narrow on purpose. Tier 1 is set like a well-made document — one column,
+     a comfortable measure, nothing running the full width of a desktop. Tier
+     2 opens out to magazine width, and the difference is visible on every
+     page without reading a word of it. */
+  --content-max: 58rem;
+  --wide-max: 66rem;
 
   --radius-sm: 0.25rem;
   --radius-md: 0.3rem;
@@ -229,6 +309,58 @@
   --tier-hero-min: 92svh;
   --tier-card-lift: -6px;
   --tier-rule-weight: 2px;
+}
+
+/* ── Tier 1 flattens; Tier 2 decorates ───────────────────────────────────
+   The tier tokens above change scale and rhythm, which reads on a homepage
+   but not on a menu. These are the page-level differences a client actually
+   points at: Tier 1 is set like a well-made document, Tier 2 like a magazine.
+*/
+
+/* Tier 1: square, flat, hairline. No shadows to soften anything, no rounded
+   corners to make it feel app-like, one accent used sparingly. */
+[data-tier='essential'] .card {
+  box-shadow: none;
+  border-color: color-mix(in oklab, var(--c-border) 78%, transparent);
+}
+
+[data-tier='essential'] .btn {
+  border-radius: var(--radius-sm);
+}
+
+/* Tier 2 and 3: every section eyebrow gets a rule running out from it, which
+   is the cheapest mark on a page that says "art-directed" rather than
+   "themed". */
+[data-tier='signature'] .eyebrow,
+[data-tier='immersive'] .eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--c-accent);
+}
+
+[data-tier='signature'] .eyebrow::after,
+[data-tier='immersive'] .eyebrow::after {
+  content: '';
+  flex: 1;
+  height: var(--tier-rule-weight, 1px);
+  background: linear-gradient(
+    to var(--rule-direction, right),
+    color-mix(in oklab, var(--c-accent) 55%, transparent),
+    transparent
+  );
+}
+
+[dir='rtl'] [data-tier='signature'] .eyebrow::after,
+[dir='rtl'] [data-tier='immersive'] .eyebrow::after {
+  --rule-direction: left;
+}
+
+/* A hairline above every section, so the page reads as composed bands rather
+   than as one long column of blocks. */
+[data-tier='signature'] .section-y + .section-y,
+[data-tier='immersive'] .section-y + .section-y {
+  border-block-start: 1px solid color-mix(in oklab, var(--c-border) 60%, transparent);
 }
 
 /* Tier 2 and 3 buy motion; Tier 1 does not pretend to have it. Cards lift,
