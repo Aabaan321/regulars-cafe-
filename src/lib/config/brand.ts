@@ -139,14 +139,34 @@ export const brand = {
    * Keep the next ~12 months populated; stale entries are ignored.
    */
   hoursExceptions: [
-    { date: '2026-01-01', label: 'New Year’s Day — late start', windows: [{ open: '09:00', close: '22:00' }] },
+    {
+      date: '2026-01-01',
+      label: 'New Year’s Day — late start',
+      windows: [{ open: '09:00', close: '22:00' }],
+    },
     { date: '2026-03-20', label: 'Eid al Fitr — closed', windows: [] },
-    { date: '2026-03-21', label: 'Eid al Fitr — reduced hours', windows: [{ open: '16:00', close: '23:00' }] },
+    {
+      date: '2026-03-21',
+      label: 'Eid al Fitr — reduced hours',
+      windows: [{ open: '16:00', close: '23:00' }],
+    },
     { date: '2026-05-27', label: 'Eid al Adha — closed', windows: [] },
-    { date: '2026-12-01', label: 'Commemoration Day', windows: [{ open: '08:00', close: '18:00' }] },
+    {
+      date: '2026-12-01',
+      label: 'Commemoration Day',
+      windows: [{ open: '08:00', close: '18:00' }],
+    },
     { date: '2026-12-02', label: 'UAE National Day', windows: [] },
-    { date: '2026-12-03', label: 'UAE National Day holiday', windows: [{ open: '10:00', close: '23:00' }] },
-    { date: '2027-01-01', label: 'New Year’s Day — late start', windows: [{ open: '09:00', close: '22:00' }] },
+    {
+      date: '2026-12-03',
+      label: 'UAE National Day holiday',
+      windows: [{ open: '10:00', close: '23:00' }],
+    },
+    {
+      date: '2027-01-01',
+      label: 'New Year’s Day — late start',
+      windows: [{ open: '09:00', close: '22:00' }],
+    },
   ] satisfies readonly HoursException[],
 
   /* ── Social ───────────────────────────────────────────────────────────── */
@@ -261,13 +281,59 @@ export const brand = {
 
 export type Brand = typeof brand;
 
+const LOCAL_ORIGIN = 'http://localhost:3000';
+
+/** Treats an unset, blank or whitespace-only variable as absent. */
+function envOrigin(value: string | undefined): string | null {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : null;
+}
+
+/**
+ * Resolves the canonical origin, with no trailing slash.
+ *
+ * Written defensively because it runs at module scope and feeds
+ * `metadataBase: new URL(siteUrl)` — anything that returns a non-URL here
+ * fails the whole build rather than one page.
+ *
+ * The subtlety that bit us: Next inlines `process.env.NEXT_PUBLIC_*` at build
+ * time, and an unset one becomes the empty string, not `undefined`. `??`
+ * therefore does NOT fall through, and `new URL('')` throws. Every candidate
+ * is checked for emptiness explicitly, and the result is parsed before it is
+ * trusted.
+ */
+function resolveSiteUrl(): string {
+  const candidates = [
+    // Explicit configuration always wins.
+    envOrigin(process.env.NEXT_PUBLIC_SITE_URL),
+    // The stable production domain of a Vercel project.
+    prefixHttps(envOrigin(process.env.VERCEL_PROJECT_PRODUCTION_URL)),
+    // The per-deployment URL, so preview builds get correct canonicals.
+    prefixHttps(envOrigin(process.env.VERCEL_URL)),
+    LOCAL_ORIGIN,
+  ];
+
+  for (const candidate of candidates) {
+    if (!candidate) continue;
+    try {
+      const url = new URL(candidate);
+      return url.origin;
+    } catch {
+      // Malformed value — try the next candidate rather than failing the build.
+    }
+  }
+
+  return LOCAL_ORIGIN;
+}
+
+/** Vercel exposes host names without a scheme. */
+function prefixHttps(host: string | null): string | null {
+  if (!host) return null;
+  return /^https?:\/\//i.test(host) ? host : `https://${host}`;
+}
+
 /** Canonical absolute URL for the deployed site, no trailing slash. */
-export const siteUrl = (
-  process.env.NEXT_PUBLIC_SITE_URL ??
-  (process.env.VERCEL_PROJECT_PRODUCTION_URL
-    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-    : 'http://localhost:3000')
-).replace(/\/$/, '');
+export const siteUrl = resolveSiteUrl();
 
 /** tel: href for the café's landline. */
 export const telHref = `tel:${brand.contact.phone}`;

@@ -41,7 +41,10 @@ export async function clientIp(): Promise<string> {
 
 function identityHash(parts: readonly string[]): string {
   const salt = process.env.TOKEN_SECRET ?? process.env.AUTH_SECRET ?? 'unsalted';
-  return createHash('sha256').update(`${salt}:${parts.join('|')}`).digest('hex').slice(0, 32);
+  return createHash('sha256')
+    .update(`${salt}:${parts.join('|')}`)
+    .digest('hex')
+    .slice(0, 32);
 }
 
 export async function rateLimit(options: RateLimitOptions): Promise<RateLimitResult> {
@@ -84,11 +87,7 @@ export interface BotCheckInput {
   readonly minimumMs?: number;
 }
 
-export function looksAutomated({
-  honeypot,
-  renderedAt,
-  minimumMs = 1500,
-}: BotCheckInput): boolean {
+export function looksAutomated({ honeypot, renderedAt, minimumMs = 1500 }: BotCheckInput): boolean {
   if (honeypot && honeypot.trim().length > 0) return true;
   if (typeof renderedAt === 'number' && Number.isFinite(renderedAt)) {
     const elapsed = Date.now() - renderedAt;

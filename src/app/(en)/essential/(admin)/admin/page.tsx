@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { AdminShell, EmptyState, StatTile } from '@/components/admin/admin-shell';
-import { asAdmin } from '@/lib/db/client';
+import { asAdmin, isDatabaseConfigured } from '@/lib/db/client';
 import { getCurrentAdmin } from '@/lib/auth/session';
 import { buildMetadata } from '@/lib/seo/metadata';
 
@@ -45,6 +45,8 @@ const dateFormat = new Intl.DateTimeFormat('en-AE', {
 });
 
 export default async function EssentialAdminPage() {
+  if (!isDatabaseConfigured()) return <NoDatabaseNotice />;
+
   const identity = await getCurrentAdmin();
   if (!identity) redirect('/essential/admin/login');
 
@@ -87,14 +89,23 @@ export default async function EssentialAdminPage() {
           <a href="/api/admin/export?type=enquiries" className="btn btn-secondary btn-sm" download>
             Export enquiries
           </a>
-          <a href="/api/admin/export?type=subscribers" className="btn btn-secondary btn-sm" download>
+          <a
+            href="/api/admin/export?type=subscribers"
+            className="btn btn-secondary btn-sm"
+            download
+          >
             Export subscribers
           </a>
         </>
       }
     >
       <div className="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatTile label="New enquiries" value={newEnquiries} tone={newEnquiries > 0 ? 'accent' : 'default'} hint="Unread" />
+        <StatTile
+          label="New enquiries"
+          value={newEnquiries}
+          tone={newEnquiries > 0 ? 'accent' : 'default'}
+          hint="Unread"
+        />
         <StatTile label="All enquiries" value={enquiries.length} hint="Last 100" />
         <StatTile label="Subscribers" value={confirmed} hint="Confirmed, double opt-in" />
         <StatTile label="Awaiting confirmation" value={pending} hint="Sent, not yet clicked" />
@@ -124,7 +135,7 @@ export default async function EssentialAdminPage() {
                       {enquiry.phone}
                     </a>
                   ) : null}
-                  <span className="text-faint ms-auto text-2xs tabular-nums">
+                  <span className="text-faint text-2xs ms-auto tabular-nums">
                     {dateFormat.format(enquiry.created_at)}
                   </span>
                 </div>
@@ -171,7 +182,7 @@ export default async function EssentialAdminPage() {
                     <th
                       key={header}
                       scope="col"
-                      className="text-faint px-3 py-2 text-start text-2xs font-bold tracking-wider uppercase"
+                      className="text-faint text-2xs px-3 py-2 text-start font-bold tracking-wider uppercase"
                     >
                       {header}
                     </th>
@@ -206,5 +217,35 @@ export default async function EssentialAdminPage() {
         )}
       </section>
     </AdminShell>
+  );
+}
+
+/**
+ * Shown on a deployment with no DATABASE_URL — a Vercel preview, usually.
+ * The public pages are all static and work fine there; only the parts backed
+ * by data cannot, and saying which is more useful than a stack trace.
+ */
+function NoDatabaseNotice() {
+  return (
+    <main id="main" className="container-page section-y flex min-h-dvh items-center">
+      <div className="mx-auto max-w-[36rem] text-center">
+        <p className="eyebrow mb-3">Staff area</p>
+        <h1 className="display-3">No database connected</h1>
+        <p className="text-muted mt-4 text-xs leading-relaxed">
+          This deployment has no <code className="font-mono">DATABASE_URL</code>, so there are no
+          enquiries or subscribers to show. The public pages are statically generated and work
+          normally.
+        </p>
+        <p className="text-faint text-2xs mt-4 leading-relaxed">
+          To enable it: point <code className="font-mono">DATABASE_URL</code> and{' '}
+          <code className="font-mono">DATABASE_ADMIN_URL</code> at a PostgreSQL 14+ instance, then
+          run <code className="font-mono">npm run db:migrate &amp;&amp; npm run seed</code>. See the
+          README.
+        </p>
+        <a href="/essential" className="btn btn-secondary mt-8">
+          Back to the site
+        </a>
+      </div>
+    </main>
   );
 }

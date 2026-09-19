@@ -84,9 +84,7 @@ export function MenuItemCard({
           </span>
         </div>
 
-        <p className="text-muted measure mt-1.5 text-xs leading-relaxed">
-          {item.description}
-        </p>
+        <p className="text-muted measure mt-1.5 text-xs leading-relaxed">{item.description}</p>
 
         {item.badges.length > 0 || item.dietary.length > 0 || !item.available ? (
           <ul className="mt-2.5 flex flex-wrap items-center gap-1.5">
@@ -100,7 +98,7 @@ export function MenuItemCard({
             {item.dietary.map((tag) => (
               <li key={tag}>
                 <span
-                  className="border-line text-faint inline-flex items-center rounded-[var(--radius-xs)] border px-1.5 py-0.5 text-2xs font-bold"
+                  className="border-line text-faint text-2xs inline-flex items-center rounded-[var(--radius-xs)] border px-1.5 py-0.5 font-bold"
                   title={dietaryLabels[tag][locale]}
                 >
                   <span aria-hidden="true">{dietaryLabels[tag].short}</span>
@@ -110,7 +108,7 @@ export function MenuItemCard({
             ))}
             {!item.available ? (
               <li>
-                <span className="text-2xs font-bold text-danger">
+                <span className="text-2xs text-danger font-bold">
                   {item.unavailableReason ?? (locale === 'ar' ? 'غير متوفر' : 'Unavailable')}
                 </span>
               </li>
@@ -119,7 +117,7 @@ export function MenuItemCard({
         ) : null}
 
         {item.allergens.length > 0 ? (
-          <p className="text-faint mt-1.5 text-2xs">
+          <p className="text-faint text-2xs mt-1.5">
             {locale === 'ar' ? 'يحتوي على: ' : 'Contains: '}
             {item.allergens.join(', ')}
           </p>

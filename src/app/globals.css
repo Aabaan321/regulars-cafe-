@@ -161,7 +161,9 @@
     font-family: var(--font-karla), ui-sans-serif, system-ui, sans-serif;
     font-size: var(--step-0);
     line-height: 1.6;
-    font-feature-settings: 'kern' 1, 'liga' 1;
+    font-feature-settings:
+      'kern' 1,
+      'liga' 1;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     overflow-x: clip;

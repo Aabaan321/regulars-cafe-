@@ -105,8 +105,8 @@ export default function NeighbourhoodPage() {
         <h1 className="display-1 max-w-[20ch]">Specialty coffee in Al Quoz</h1>
         <p className="lede measure mt-5">
           Al Quoz is an industrial district that turned into Dubai&rsquo;s arts quarter without
-          bothering to change its address. Alserkal Avenue sits in the middle of it, and we roast
-          in Warehouse 14 at the 17th Street end.
+          bothering to change its address. Alserkal Avenue sits in the middle of it, and we roast in
+          Warehouse 14 at the 17th Street end.
         </p>
 
         <div className="mt-6 flex flex-wrap items-center gap-4">
@@ -146,9 +146,7 @@ export default function NeighbourhoodPage() {
         <ul className="grid gap-4 md:grid-cols-3">
           {parkingNotes.map((note) => (
             <li key={note.when} className="card p-5">
-              <h3 className="font-display text-ink text-lg font-semibold">
-                {note.when}
-              </h3>
+              <h3 className="font-display text-ink text-lg font-semibold">{note.when}</h3>
               <p className="text-muted mt-2 text-xs leading-relaxed">{note.advice}</p>
             </li>
           ))}
@@ -168,8 +166,8 @@ export default function NeighbourhoodPage() {
             <h3 className="display-3">By car</h3>
             <p className="prose-body measure mt-3">
               Coming from Sheikh Zayed Road, exit at Umm Al Sheif and follow Al Manara Street south
-              for 1.8km. Turn left onto 17th Street; the Avenue entrance is 200 metres on the
-              right. From Al Khail Road, exit at Al Quoz and follow the signs for Alserkal Avenue.
+              for 1.8km. Turn left onto 17th Street; the Avenue entrance is 200 metres on the right.
+              From Al Khail Road, exit at Al Quoz and follow the signs for Alserkal Avenue.
             </p>
             <p className="prose-body measure mt-3">
               Set your map to{' '}
@@ -212,16 +210,10 @@ export default function NeighbourhoodPage() {
             {neighbours.map((place) => (
               <li key={place.name} className="border-line/70 border-b py-4 last:border-0">
                 <div className="flex items-baseline justify-between gap-4">
-                  <h3 className="font-display text-ink text-lg font-semibold">
-                    {place.name}
-                  </h3>
-                  <span className="text-faint shrink-0 text-2xs font-bold">
-                    {place.distance}
-                  </span>
+                  <h3 className="font-display text-ink text-lg font-semibold">{place.name}</h3>
+                  <span className="text-faint text-2xs shrink-0 font-bold">{place.distance}</span>
                 </div>
-                <p className="text-muted mt-1.5 text-xs leading-relaxed">
-                  {place.note}
-                </p>
+                <p className="text-muted mt-1.5 text-xs leading-relaxed">{place.note}</p>
               </li>
             ))}
           </ul>
@@ -251,10 +243,12 @@ export default function NeighbourhoodPage() {
               href: '/essential/menu',
             },
           ].map((pick) => (
-            <Link key={pick.title} href={pick.href} className="card hover:border-line-strong block p-5 no-underline">
-              <h3 className="font-display text-ink text-lg font-semibold">
-                {pick.title}
-              </h3>
+            <Link
+              key={pick.title}
+              href={pick.href}
+              className="card hover:border-line-strong block p-5 no-underline"
+            >
+              <h3 className="font-display text-ink text-lg font-semibold">{pick.title}</h3>
               <p className="text-muted mt-2 text-xs leading-relaxed">{pick.body}</p>
             </Link>
           ))}

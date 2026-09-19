@@ -14,12 +14,7 @@ import { brand } from '@/lib/config/brand';
  */
 
 export type DietaryTag =
-  | 'vegan'
-  | 'vegetarian'
-  | 'gluten-free'
-  | 'dairy-free'
-  | 'contains-nuts'
-  | 'spicy';
+  'vegan' | 'vegetarian' | 'gluten-free' | 'dairy-free' | 'contains-nuts' | 'spicy';
 
 export type MenuBadge = 'new' | 'signature';
 
@@ -35,7 +30,9 @@ const arPrice = new Intl.NumberFormat('ar-AE', {
 /** 2600 → "AED 26". 3450 → "AED 34.50". */
 export function formatPrice(fils: number, locale: 'en' | 'ar' = 'en'): string {
   const amount = fils / 100;
-  return locale === 'ar' ? `${arPrice.format(amount)} د.إ` : `${brand.currency} ${enPrice.format(amount)}`;
+  return locale === 'ar'
+    ? `${arPrice.format(amount)} د.إ`
+    : `${brand.currency} ${enPrice.format(amount)}`;
 }
 
 export const dietaryLabels: Record<DietaryTag, { en: string; ar: string; short: string }> = {

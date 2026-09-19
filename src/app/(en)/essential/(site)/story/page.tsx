@@ -126,10 +126,8 @@ export default function StoryPage() {
         <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {team.map((person) => (
             <li key={person.name} className="card p-5">
-              <h3 className="font-display text-ink text-lg font-semibold">
-                {person.name}
-              </h3>
-              <p className="text-accent mt-0.5 text-2xs font-bold tracking-wide uppercase">
+              <h3 className="font-display text-ink text-lg font-semibold">{person.name}</h3>
+              <p className="text-accent text-2xs mt-0.5 font-bold tracking-wide uppercase">
                 {person.role}
               </p>
               <p className="text-muted mt-3 text-xs leading-relaxed">{person.note}</p>

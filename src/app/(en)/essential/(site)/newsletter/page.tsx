@@ -68,19 +68,24 @@ export default async function NewsletterPage({
         <p className="eyebrow mb-3">Once a month, that is all</p>
         <h1 className="display-2">The Regulars letter</h1>
         <p className="lede mt-4">
-          What is on the brew bar, what the kitchen has started doing, and first refusal on
-          cuppings and supper clubs. We have never sent two in a month and we are not going to
-          start.
+          What is on the brew bar, what the kitchen has started doing, and first refusal on cuppings
+          and supper clubs. We have never sent two in a month and we are not going to start.
         </p>
 
         <div className="border-line mt-10 border-t pt-8">
-          <NewsletterForm dict={dict} locale="en" tier="essential" source="newsletter-page" compact={false} />
+          <NewsletterForm
+            dict={dict}
+            locale="en"
+            tier="essential"
+            source="newsletter-page"
+            compact={false}
+          />
         </div>
 
-        <p className="text-faint mt-8 text-2xs leading-relaxed">
+        <p className="text-faint text-2xs mt-8 leading-relaxed">
           Double opt-in: we send one confirmation email and you are not on the list until you click
-          it. Every letter carries a one-click unsubscribe. We do not sell or share the list —
-          there is nobody to sell it to who would treat you well.
+          it. Every letter carries a one-click unsubscribe. We do not sell or share the list — there
+          is nobody to sell it to who would treat you well.
         </p>
 
         <Link href="/essential" className="btn btn-secondary mt-8">

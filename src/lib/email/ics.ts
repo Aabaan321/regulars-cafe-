@@ -73,7 +73,9 @@ export function buildIcs(event: CalendarEvent): string {
   ];
 
   if (event.attendeeEmail) {
-    lines.push(`ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;RSVP=FALSE:mailto:${event.attendeeEmail}`);
+    lines.push(
+      `ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;RSVP=FALSE:mailto:${event.attendeeEmail}`,
+    );
   }
   if (event.url) lines.push(`URL:${event.url}`);
 

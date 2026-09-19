@@ -15,11 +15,7 @@ import { createHash, createHmac, randomBytes, timingSafeEqual } from 'node:crypt
  */
 
 export type TokenPurpose =
-  | 'manage-booking'
-  | 'confirm-subscription'
-  | 'unsubscribe'
-  | 'loyalty-card'
-  | 'waitlist-offer';
+  'manage-booking' | 'confirm-subscription' | 'unsubscribe' | 'loyalty-card' | 'waitlist-offer';
 
 function secret(): string {
   const value = process.env.TOKEN_SECRET ?? process.env.AUTH_SECRET;
@@ -30,9 +26,7 @@ function secret(): string {
 }
 
 function sign(purpose: TokenPurpose, id: string, nonce: string): string {
-  return createHmac('sha256', secret())
-    .update(`${purpose}:${id}:${nonce}`)
-    .digest('base64url');
+  return createHmac('sha256', secret()).update(`${purpose}:${id}:${nonce}`).digest('base64url');
 }
 
 export interface IssuedToken {

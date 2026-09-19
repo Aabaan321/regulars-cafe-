@@ -105,8 +105,7 @@ export async function getCurrentAdmin(): Promise<AdminIdentity | null> {
 }
 
 export type SignInResult =
-  | { ok: true; identity: AdminIdentity }
-  | { ok: false; error: 'invalid_credentials' | 'inactive' };
+  { ok: true; identity: AdminIdentity } | { ok: false; error: 'invalid_credentials' | 'inactive' };
 
 /**
  * Verifies credentials. Always runs a hash comparison, even for an unknown
@@ -117,7 +116,14 @@ export async function signIn(email: string, password: string): Promise<SignInRes
 
   const rows = await asService(
     async (tx) => tx<
-      { id: string; email: string; name: string; role: AdminRole; password_hash: string; is_active: boolean }[]
+      {
+        id: string;
+        email: string;
+        name: string;
+        role: AdminRole;
+        password_hash: string;
+        is_active: boolean;
+      }[]
     >`
       select id, email::text, name, role::text as role, password_hash, is_active
         from admin_users

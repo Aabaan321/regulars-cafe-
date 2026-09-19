@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef } from 'react';
 
 /**
  * Form building blocks shared by every public form.
@@ -18,10 +18,15 @@ import { useEffect, useId, useRef, useState } from 'react';
  * technology and to keyboard users.
  */
 export function BotFields() {
-  const [renderedAt, setRenderedAt] = useState<number>(0);
   const id = useId();
+  const stampRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => setRenderedAt(Date.now()), []);
+  // Written straight to the input rather than held in state: it is never
+  // rendered, only submitted, so putting it through React would cost a second
+  // render of every form on the page for nothing.
+  useEffect(() => {
+    if (stampRef.current) stampRef.current.value = String(Date.now());
+  }, []);
 
   return (
     <>
@@ -46,7 +51,7 @@ export function BotFields() {
           defaultValue=""
         />
       </div>
-      <input type="hidden" name="renderedAt" value={renderedAt || ''} readOnly />
+      <input ref={stampRef} type="hidden" name="renderedAt" defaultValue="" />
     </>
   );
 }
@@ -152,7 +157,7 @@ export function FormResult({
       </p>
       {body ? <p className="text-muted mt-1.5 ps-6 text-xs">{body}</p> : null}
       {onReset && resetLabel ? (
-        <button type="button" onClick={onReset} className="btn btn-secondary btn-sm mt-4 ms-6">
+        <button type="button" onClick={onReset} className="btn btn-secondary btn-sm ms-6 mt-4">
           {resetLabel}
         </button>
       ) : null}

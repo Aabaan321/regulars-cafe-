@@ -34,7 +34,12 @@ export function MobileActionBar({ dict }: { dict: Dictionary }) {
   const actions = [
     { href: telHref, label: dict.common.call, icon: '☎', external: false },
     { href: directionsHref, label: dict.common.directions, icon: '➤', external: true },
-    { href: whatsappHref(`Hi ${brand.name} —`), label: dict.common.whatsapp, icon: '✆', external: true },
+    {
+      href: whatsappHref(`Hi ${brand.name} —`),
+      label: dict.common.whatsapp,
+      icon: '✆',
+      external: true,
+    },
   ];
 
   return (

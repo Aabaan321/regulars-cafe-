@@ -29,7 +29,12 @@ export function Hero({
   eyebrow?: string;
   heading: string;
   lede?: string;
-  actions?: readonly { label: string; href: string; variant?: 'primary' | 'secondary'; external?: boolean }[];
+  actions?: readonly {
+    label: string;
+    href: string;
+    variant?: 'primary' | 'secondary';
+    external?: boolean;
+  }[];
   locale?: Locale;
   showOpenState?: boolean;
   size?: 'full' | 'short';
@@ -83,8 +88,16 @@ export function Hero({
           Written as inline styles rather than arbitrary utilities: a five-stop
           gradient is exactly the case where a utility class stops being
           readable, and these are two decorative divs, not a design token. */}
-      <div aria-hidden="true" className="absolute inset-0 -z-10" style={{ backgroundImage: verticalScrim }} />
-      <div aria-hidden="true" className="absolute inset-0 -z-10" style={{ backgroundImage: edgeScrim }} />
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 -z-10"
+        style={{ backgroundImage: verticalScrim }}
+      />
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 -z-10"
+        style={{ backgroundImage: edgeScrim }}
+      />
 
       <div className="container-wide relative">
         <div className={align === 'center' ? 'mx-auto max-w-[46rem] text-center' : 'max-w-[42rem]'}>

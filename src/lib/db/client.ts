@@ -21,7 +21,7 @@ import postgres, { type Sql, type TransactionSql } from 'postgres';
 
 declare global {
   // Reused across hot reloads in development so we do not leak pools.
-  // eslint-disable-next-line no-var
+
   var __regularsPool: Sql | undefined;
 }
 
@@ -113,6 +113,26 @@ export function asAdmin<T>(
  */
 export function asService<T>(fn: (tx: TransactionSql) => Promise<T>): Promise<T> {
   return withRole('service_role', { role: 'service_role' }, fn);
+}
+
+/**
+ * Is a database configured at all?
+ *
+ * Cheap and synchronous — no connection attempt. Pages use it to render a
+ * designed "needs a database" panel instead of a 500, which is what a preview
+ * deployment without DATABASE_URL would otherwise show.
+ */
+export function isDatabaseConfigured(): boolean {
+  return Boolean(process.env.DATABASE_URL?.trim());
+}
+
+/** Thrown when the database is unreachable, so callers can tell it apart. */
+export class DatabaseUnavailableError extends Error {
+  constructor(cause?: unknown) {
+    super('The database is not reachable.');
+    this.name = 'DatabaseUnavailableError';
+    this.cause = cause;
+  }
 }
 
 /** True when a database is configured and reachable. Used by health checks. */

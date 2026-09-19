@@ -14,9 +14,21 @@ export default function EssentialNotFound() {
   const image = requireImage('spaceShelf');
 
   const links = [
-    { href: '/essential/menu', title: 'The menu', body: 'Coffee, brunch and what came out of the oven this morning.' },
-    { href: '/essential/visit', title: 'Visit us', body: 'Hours, parking, and whether we are open right now.' },
-    { href: '/essential/story', title: 'Our story', body: 'The warehouse, the farms and the Giesen at the back.' },
+    {
+      href: '/essential/menu',
+      title: 'The menu',
+      body: 'Coffee, brunch and what came out of the oven this morning.',
+    },
+    {
+      href: '/essential/visit',
+      title: 'Visit us',
+      body: 'Hours, parking, and whether we are open right now.',
+    },
+    {
+      href: '/essential/story',
+      title: 'Our story',
+      body: 'The warehouse, the farms and the Giesen at the back.',
+    },
     { href: '/essential/gallery', title: 'Gallery', body: 'What the room actually looks like.' },
   ];
 
@@ -41,8 +53,8 @@ export default function EssentialNotFound() {
           <p className="eyebrow mb-3">404 — page not found</p>
           <h1 className="display-2">We have looked everywhere. It is not on the shelf.</h1>
           <p className="lede measure mt-4">
-            That page has either moved or never existed. Either way it is our fault, not yours.
-            Here is where most people were heading.
+            That page has either moved or never existed. Either way it is our fault, not yours. Here
+            is where most people were heading.
           </p>
 
           <ul className="mt-8 grid gap-3 sm:grid-cols-2">
@@ -55,7 +67,7 @@ export default function EssentialNotFound() {
                   <span className="font-display text-ink block text-base font-semibold">
                     {link.title}
                   </span>
-                  <span className="text-muted mt-1 block text-2xs leading-relaxed">
+                  <span className="text-muted text-2xs mt-1 block leading-relaxed">
                     {link.body}
                   </span>
                 </Link>
@@ -67,12 +79,17 @@ export default function EssentialNotFound() {
             <Link href="/essential" className="btn">
               Back to the start
             </Link>
-            <a href={directionsHref} target="_blank" rel="noopener noreferrer" className="btn btn-secondary">
+            <a
+              href={directionsHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-secondary"
+            >
               Just give me directions
             </a>
           </div>
 
-          <p className="text-faint mt-6 text-2xs">
+          <p className="text-faint text-2xs mt-6">
             Still stuck? Call {brand.contact.phoneDisplay} — someone will pick up.
           </p>
         </div>

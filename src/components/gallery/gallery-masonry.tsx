@@ -138,7 +138,11 @@ export function GalleryMasonry({
           <div className="flex h-full max-h-[100dvh] flex-col">
             <div className="border-line flex items-center justify-between gap-4 border-b px-4 py-2.5">
               <p className="text-faint text-2xs tabular-nums">
-                {fill(dict.a11y.imageCounter, { index: (openIndex ?? 0) + 1, total: images.length }, locale)}
+                {fill(
+                  dict.a11y.imageCounter,
+                  { index: (openIndex ?? 0) + 1, total: images.length },
+                  locale,
+                )}
               </p>
               <div className="flex items-center gap-1">
                 <button

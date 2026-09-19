@@ -278,7 +278,10 @@ export const menuItemUpdateSchema = z.object({
   isAvailable: z.boolean().optional(),
   unavailableReason: z.string().trim().max(120).nullable().optional(),
   isOrderable: z.boolean().optional(),
-  badges: z.array(z.enum(['new', 'signature'])).max(2).optional(),
+  badges: z
+    .array(z.enum(['new', 'signature']))
+    .max(2)
+    .optional(),
   dietary: z
     .array(z.enum(['vegan', 'vegetarian', 'gluten-free', 'dairy-free', 'contains-nuts', 'spicy']))
     .max(6)
@@ -291,8 +294,14 @@ export const blackoutCreateSchema = z
     date: isoDateSchema,
     reason: z.string().trim().min(2).max(120),
     isFullDay: z.boolean().default(true),
-    startsAt: z.string().regex(/^\d{2}:\d{2}$/).optional(),
-    endsAt: z.string().regex(/^\d{2}:\d{2}$/).optional(),
+    startsAt: z
+      .string()
+      .regex(/^\d{2}:\d{2}$/)
+      .optional(),
+    endsAt: z
+      .string()
+      .regex(/^\d{2}:\d{2}$/)
+      .optional(),
   })
   .refine((v) => v.isFullDay || (v.startsAt && v.endsAt && v.endsAt > v.startsAt), {
     message: 'A partial closure needs a start and an end, in that order.',

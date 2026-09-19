@@ -62,8 +62,7 @@ export function InstagramGrid({ heading, cta }: { heading: string; cta: string }
                 <span
                   className="absolute inset-0 flex items-end p-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100"
                   style={{
-                    backgroundImage:
-                      'linear-gradient(to top, rgba(12,9,7,0.85), transparent 58%)',
+                    backgroundImage: 'linear-gradient(to top, rgba(12,9,7,0.85), transparent 58%)',
                   }}
                 >
                   <span className="line-clamp-3 text-[10px] leading-tight text-white">

@@ -42,10 +42,15 @@ export function LoginForm({ redirectTo, demoHint }: { redirectTo: string; demoHi
         )}
       </Field>
 
-      <SubmitButton label="Sign in" pendingLabel="Signing in…" pending={pending} className="btn btn-lg" />
+      <SubmitButton
+        label="Sign in"
+        pendingLabel="Signing in…"
+        pending={pending}
+        className="btn btn-lg"
+      />
 
       {demoHint ? (
-        <p className="text-faint border-line mt-2 border-t pt-4 text-2xs leading-relaxed">
+        <p className="text-faint border-line text-2xs mt-2 border-t pt-4 leading-relaxed">
           {demoHint}
         </p>
       ) : null}

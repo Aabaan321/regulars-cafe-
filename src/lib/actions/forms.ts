@@ -1,13 +1,9 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { asService } from '@/lib/db/client';
+import { asService, isDatabaseConfigured } from '@/lib/db/client';
 import { sendEmail, sendEmailDetached } from '@/lib/email/send';
-import {
-  enquiryAckEmail,
-  enquiryAlertEmail,
-  subscribeConfirmEmail,
-} from '@/lib/email/templates';
+import { enquiryAckEmail, enquiryAlertEmail, subscribeConfirmEmail } from '@/lib/email/templates';
 import { brand, siteUrl } from '@/lib/config/brand';
 import { issueToken } from '@/lib/utils/tokens';
 import { looksAutomated, rateLimit } from '@/lib/utils/rate-limit';
@@ -18,10 +14,15 @@ import type { FormState } from '@/lib/actions/form-state';
 /**
  * Server actions for the public forms.
  *
- * These are actions rather than fetch-to-an-API-route so the forms work with
- * JavaScript disabled: the browser posts the form, the action runs, the page
- * re-renders with the result. With JS on, `useActionState` upgrades the same
- * code path to an inline, non-navigating submit.
+ * Server actions rather than fetch-to-an-API-route: validation, rate limiting
+ * and persistence all happen server-side, and the client never holds a
+ * privileged credential.
+ *
+ * Note: these forms require JavaScript. Next emits the hidden action fields
+ * for no-JS submission, but with `useActionState` in a Client Component the
+ * submission does not actually reach the server with scripting disabled —
+ * tested, not assumed. Making that work would mean moving the markup into
+ * Server Components with a plain `<form action={…}>`.
  *
  * Order of operations on every public write, without exception:
  *   1. bot check (honeypot + time-to-submit)   — cheapest, no DB
@@ -30,6 +31,21 @@ import type { FormState } from '@/lib/actions/form-state';
  *   4. write, as service_role
  *   5. email, detached, so a mail failure never fails the write
  */
+
+/**
+ * Shown when the deployment has no DATABASE_URL — a preview build, typically.
+ * Saying so plainly beats a 500, and beats a success message for a write that
+ * never happened.
+ */
+function noDatabaseState(echoed: Record<string, string>): FormState {
+  return {
+    status: 'error',
+    message:
+      'This deployment has no database connected, so the form cannot save your message. ' +
+      'Please call or WhatsApp us instead — both reach a person.',
+    values: echoed,
+  };
+}
 
 function values(formData: FormData, keys: readonly string[]): Record<string, string> {
   const out: Record<string, string> = {};
@@ -44,10 +60,7 @@ function values(formData: FormData, keys: readonly string[]): Record<string, str
 
 const ENQUIRY_FIELDS = ['name', 'email', 'phone', 'topic', 'message'] as const;
 
-export async function submitEnquiry(
-  _previous: FormState,
-  formData: FormData,
-): Promise<FormState> {
+export async function submitEnquiry(_previous: FormState, formData: FormData): Promise<FormState> {
   const locale = (formData.get('locale') as Locale) ?? 'en';
   const dict = getDictionary(locale);
   const echoed = values(formData, ENQUIRY_FIELDS);
@@ -61,6 +74,8 @@ export async function submitEnquiry(
     // Indistinguishable from success: a bot that learns it was caught adapts.
     return { status: 'success', message: dict.forms.successBody };
   }
+
+  if (!isDatabaseConfigured()) return noDatabaseState(echoed);
 
   const parsed = enquirySchema.safeParse({
     name: formData.get('name'),
@@ -160,6 +175,8 @@ export async function subscribeToNewsletter(
   ) {
     return { status: 'success', message: dict.newsletter.pendingBody };
   }
+
+  if (!isDatabaseConfigured()) return noDatabaseState(echoed);
 
   const parsed = subscribeSchema.safeParse({
     email: formData.get('email'),

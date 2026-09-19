@@ -10,9 +10,10 @@ import type { TierId } from '@/lib/config/navigation';
 /**
  * Newsletter sign-up.
  *
- * A plain <form> posting to a server action, so it works before hydration and
- * with JavaScript off entirely. `useActionState` upgrades it to an inline
- * submit once React is running.
+ * A plain <form> posting to a server action. `useActionState` gives it inline
+ * pending and error states.
+ *
+ * Requires JavaScript — see the note in `lib/actions/forms.ts`.
  */
 export function NewsletterForm({
   dict,
@@ -37,17 +38,14 @@ export function NewsletterForm({
 
   if (state.status === 'success') {
     return (
-      <div
-        role="status"
-        className="border-line bg-surface rounded-[var(--radius-md)] border p-4"
-      >
+      <div role="status" className="border-line bg-surface rounded-[var(--radius-md)] border p-4">
         <p className="flex items-start gap-2 text-xs font-bold">
           <span aria-hidden="true" className="text-success">
             ✓
           </span>
           {dict.newsletter.pendingTitle}
         </p>
-        <p className="text-muted mt-1 ps-6 text-2xs leading-relaxed">
+        <p className="text-muted text-2xs mt-1 ps-6 leading-relaxed">
           {state.message ?? dict.newsletter.pendingBody}
         </p>
       </div>
@@ -102,9 +100,7 @@ export function NewsletterForm({
           {state.fieldErrors?.email ?? state.message}
         </p>
       ) : (
-        <p className="text-faint mt-2 text-2xs">
-          {compact ? dict.newsletter.body : ''}
-        </p>
+        <p className="text-faint text-2xs mt-2">{compact ? dict.newsletter.body : ''}</p>
       )}
     </form>
   );

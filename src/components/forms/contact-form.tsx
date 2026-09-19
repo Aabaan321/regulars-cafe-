@@ -19,9 +19,11 @@ const TOPICS = [
 /**
  * The contact form.
  *
- * Posts to a server action so it works before hydration and with JavaScript
- * off. On error the guest's input is echoed back from the server rather than
- * relying on the browser having preserved it.
+ * Posts to a server action, so validation and persistence are server-side. On
+ * error the guest's input is echoed back from the server rather than relying
+ * on the browser having preserved it.
+ *
+ * Requires JavaScript — see the note in `lib/actions/forms.ts`.
  */
 export function ContactForm({
   dict,
@@ -147,9 +149,7 @@ export function ContactForm({
           className="btn btn-lg"
         />
         <p className="text-faint text-2xs">
-          {locale === 'ar'
-            ? 'نردّ خلال يوم عمل واحد.'
-            : 'We reply within one working day.'}
+          {locale === 'ar' ? 'نردّ خلال يوم عمل واحد.' : 'We reply within one working day.'}
         </p>
       </div>
     </form>

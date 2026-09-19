@@ -1,10 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { readStorage, useClientValue, writeStorage } from '@/lib/hooks/use-client-value';
 import type { Dictionary } from '@/lib/i18n/dictionaries';
 
 type Choice = 'light' | 'dark' | 'system';
 const STORAGE_KEY = 'regulars-theme';
+
+function readStoredChoice(): Choice {
+  const stored = readStorage(STORAGE_KEY);
+  return stored === 'light' || stored === 'dark' ? stored : 'system';
+}
 
 /**
  * Theme control.
@@ -15,33 +21,23 @@ const STORAGE_KEY = 'regulars-theme';
  * applied the right theme before paint; this only writes the preference.
  */
 export function ThemeToggle({ dict, className = '' }: { dict: Dictionary; className?: string }) {
-  const [choice, setChoice] = useState<Choice>('system');
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored === 'light' || stored === 'dark') setChoice(stored);
-    } catch {
-      /* storage blocked — stay on system */
-    }
-  }, []);
+  // The stored preference is read through a client snapshot, so there is no
+  // "mounted" flag and no second render. A click takes precedence for the rest
+  // of the visit.
+  const stored = useClientValue(readStoredChoice, 'system');
+  const [override, setOverride] = useState<Choice | null>(null);
+  const choice = override ?? stored;
 
   function apply(next: Choice) {
-    setChoice(next);
+    setOverride(next);
     const root = document.documentElement;
-    try {
-      if (next === 'system') {
-        localStorage.removeItem(STORAGE_KEY);
-        const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        root.setAttribute('data-theme', dark ? 'dark' : 'light');
-      } else {
-        localStorage.setItem(STORAGE_KEY, next);
-        root.setAttribute('data-theme', next);
-      }
-    } catch {
-      root.setAttribute('data-theme', next === 'system' ? 'light' : next);
+    if (next === 'system') {
+      writeStorage(STORAGE_KEY, null);
+      const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      root.setAttribute('data-theme', dark ? 'dark' : 'light');
+    } else {
+      writeStorage(STORAGE_KEY, next);
+      root.setAttribute('data-theme', next);
     }
   }
 
@@ -58,7 +54,7 @@ export function ThemeToggle({ dict, className = '' }: { dict: Dictionary; classN
       className={`border-line bg-bg-subtle inline-flex items-center gap-0.5 rounded-[var(--radius-pill)] border p-0.5 ${className}`}
     >
       {options.map((option) => {
-        const active = mounted && choice === option.value;
+        const active = choice === option.value;
         return (
           <button
             key={option.value}

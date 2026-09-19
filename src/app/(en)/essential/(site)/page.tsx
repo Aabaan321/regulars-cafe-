@@ -50,7 +50,10 @@ export default function EssentialHome() {
 
   return (
     <>
-      <JsonLd id="ld-faq-home" data={faqSchema(faqs.slice(0, 6).map((f) => ({ question: f.question, answer: f.answer })))} />
+      <JsonLd
+        id="ld-faq-home"
+        data={faqSchema(faqs.slice(0, 6).map((f) => ({ question: f.question, answer: f.answer })))}
+      />
 
       <Hero
         imageKey="heroHome"
@@ -60,7 +63,12 @@ export default function EssentialHome() {
         showOpenState
         actions={[
           { label: dict.common.viewMenu, href: '/essential/menu' },
-          { label: dict.common.directions, href: directionsHref, variant: 'secondary', external: true },
+          {
+            label: dict.common.directions,
+            href: directionsHref,
+            variant: 'secondary',
+            external: true,
+          },
         ]}
       />
 
@@ -82,9 +90,7 @@ export default function EssentialHome() {
             },
           ].map((fact) => (
             <div key={fact.title}>
-              <h2 className="font-display text-ink mb-1.5 text-lg font-semibold">
-                {fact.title}
-              </h2>
+              <h2 className="font-display text-ink mb-1.5 text-lg font-semibold">{fact.title}</h2>
               <p className="text-muted text-xs leading-relaxed">{fact.body}</p>
             </div>
           ))}

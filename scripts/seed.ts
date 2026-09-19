@@ -175,7 +175,9 @@ async function main() {
       `;
     }
   }
-  console.info(`  ✓ ${menuCategories.length} categories, ${menuItems.length} menu items, ${modifierGroups.length} modifier groups`);
+  console.info(
+    `  ✓ ${menuCategories.length} categories, ${menuItems.length} menu items, ${modifierGroups.length} modifier groups`,
+  );
 
   /* ── Room ───────────────────────────────────────────────────────────── */
   for (const [index, table] of demoTables.entries()) {
@@ -212,12 +214,26 @@ async function main() {
     }
   }
   const seats = demoTables.reduce((sum, t) => sum + t.seatsMax, 0);
-  console.info(`  ✓ ${demoTables.length} tables (${seats} covers), ${servicePeriods.length} service periods`);
+  console.info(
+    `  ✓ ${demoTables.length} tables (${seats} covers), ${servicePeriods.length} service periods`,
+  );
 
   /* ── Blackout dates ─────────────────────────────────────────────────── */
   const blackouts = [
-    { date: dubaiDatePlus(9), reason: 'Private hire — book launch, whole warehouse', fullDay: true, from: null, to: null },
-    { date: dubaiDatePlus(4), reason: 'Courtyard closed for a photo shoot', fullDay: false, from: '16:00', to: '20:30' },
+    {
+      date: dubaiDatePlus(9),
+      reason: 'Private hire — book launch, whole warehouse',
+      fullDay: true,
+      from: null,
+      to: null,
+    },
+    {
+      date: dubaiDatePlus(4),
+      reason: 'Courtyard closed for a photo shoot',
+      fullDay: false,
+      from: '16:00',
+      to: '20:30',
+    },
   ];
   for (const blackout of blackouts) {
     await sql`
@@ -239,7 +255,16 @@ async function main() {
   const weekdayQuiet = ['07:30', '08:00', '10:45', '14:30', '17:00', '18:00', '19:00'];
   const weekendPeak = ['11:15', '11:30', '11:45', '12:00', '12:15', '12:30', '12:45', '13:00'];
   const weekendQuiet = ['08:30', '09:15', '10:00', '14:45', '17:00', '18:30'];
-  const occasions = ['none', 'none', 'none', 'birthday', 'anniversary', 'business', 'first_visit', 'date'];
+  const occasions = [
+    'none',
+    'none',
+    'none',
+    'birthday',
+    'anniversary',
+    'business',
+    'first_visit',
+    'date',
+  ];
 
   let booked = 0;
   let rejected = 0;
@@ -303,7 +328,9 @@ async function main() {
 
   console.info(`  ✓ ${booked} reservations over the next 14 days`);
   if (rejected > 0) {
-    const summary = [...rejectionReasons.entries()].map(([reason, n]) => `${reason} ×${n}`).join(', ');
+    const summary = [...rejectionReasons.entries()]
+      .map(([reason, n]) => `${reason} ×${n}`)
+      .join(', ');
     console.info(`    (${rejected} attempts correctly refused by the engine: ${summary})`);
   }
 
@@ -355,12 +382,21 @@ async function main() {
       on conflict (email) do nothing
     `;
   }
-  console.info(`  ✓ ${demoSubscribers.length} subscribers (${demoSubscribers.filter((s) => s.confirmed).length} confirmed)`);
+  console.info(
+    `  ✓ ${demoSubscribers.length} subscribers (${demoSubscribers.filter((s) => s.confirmed).length} confirmed)`,
+  );
 
   /* ── Orders ─────────────────────────────────────────────────────────── */
   const orderable = menuItems.filter((i) => i.orderable && i.available);
   const orderStatuses: readonly ('paid' | 'preparing' | 'ready' | 'collected')[] = [
-    'paid', 'paid', 'preparing', 'preparing', 'ready', 'ready', 'collected', 'paid',
+    'paid',
+    'paid',
+    'preparing',
+    'preparing',
+    'ready',
+    'ready',
+    'collected',
+    'paid',
   ];
 
   for (const [index, status] of orderStatuses.entries()) {
@@ -425,8 +461,15 @@ async function main() {
         'An hour on the cupping table with Nadia. We pour three coffees blind — the Guji Uraga we buy, and two lots from the same region we passed on — and you score them before we tell you which is which. You will leave able to taste the difference between a good natural and a great one, and with a 250g bag of whichever you liked most.',
       descriptionAr:
         'ساعة على طاولة التذوّق مع نادية. نقدّم ثلاث قهوات دون كشف هويتها، وتمنحها درجاتك قبل أن نخبرك أيها أيّ. ستغادر قادراً على تمييز الفرق، ومعك كيس ٢٥٠ غراماً من القهوة التي فضّلتها.',
-      type: 'cupping', daysOut: 11, hour: 16, durationMinutes: 75,
-      priceFils: 12000, capacity: 12, taken: 9, imageKey: 'pourOver', host: 'Nadia Haddad',
+      type: 'cupping',
+      daysOut: 11,
+      hour: 16,
+      durationMinutes: 75,
+      priceFils: 12000,
+      capacity: 12,
+      taken: 9,
+      imageKey: 'pourOver',
+      host: 'Nadia Haddad',
     },
     {
       slug: 'latte-art-for-people-who-spill',
@@ -438,8 +481,15 @@ async function main() {
         'Joy takes six people at a time through milk texturing from the beginning: why your microfoam is bubbly, why the jug matters more than the wrist, and how to pour a heart that survives being carried to a table. You get the machine to yourself for the last hour. Everybody leaves able to pour something.',
       descriptionAr:
         'تأخذ جوي ستة أشخاص في كل مرة عبر أساسيات رغوة الحليب: لماذا تكون رغوتك فقاعية، ولماذا يهم الإبريق أكثر من المعصم. وتحصل على الآلة لنفسك في الساعة الأخيرة.',
-      type: 'workshop', daysOut: 18, hour: 15, durationMinutes: 180,
-      priceFils: 28000, capacity: 6, taken: 6, imageKey: 'flatWhite', host: 'Joy Mendoza',
+      type: 'workshop',
+      daysOut: 18,
+      hour: 15,
+      durationMinutes: 180,
+      priceFils: 28000,
+      capacity: 6,
+      taken: 6,
+      imageKey: 'flatWhite',
+      host: 'Joy Mendoza',
     },
     {
       slug: 'supper-club-levantine-breakfast-at-night',
@@ -451,8 +501,15 @@ async function main() {
         'Thirty seats, one long table, seven courses. Rami takes the dishes he cooks every morning and treats them like a tasting menu: foul as a warm dumpling, shakshuka reduced to a sauce under quail egg, kunafa french toast as a dessert it always wanted to be. Arrive at seven, leave when we stop talking.',
       descriptionAr:
         'ثلاثون مقعداً وطاولة واحدة طويلة وسبعة أطباق. يأخذ رامي ما يطهوه كل صباح ويقدّمه كقائمة تذوّق. الوصول عند السابعة، والمغادرة حين نتوقف عن الحديث.',
-      type: 'supper_club', daysOut: 25, hour: 19, durationMinutes: 210,
-      priceFils: 32000, capacity: 30, taken: 17, imageKey: 'brunchSpread', host: 'Rami Kassab',
+      type: 'supper_club',
+      daysOut: 25,
+      hour: 19,
+      durationMinutes: 210,
+      priceFils: 32000,
+      capacity: 30,
+      taken: 17,
+      imageKey: 'brunchSpread',
+      host: 'Rami Kassab',
     },
   ] as const;
 
@@ -495,7 +552,13 @@ async function main() {
 
   /* ── Loyalty ────────────────────────────────────────────────────────── */
   const cards = [
-    { name: 'Layla Al Marzooqi', email: 'layla.marzooqi@example.ae', stamps: 4, earned: 1, redeemed: 1 },
+    {
+      name: 'Layla Al Marzooqi',
+      email: 'layla.marzooqi@example.ae',
+      stamps: 4,
+      earned: 1,
+      redeemed: 1,
+    },
     { name: 'Tom Whitfield', email: 't.whitfield@example.com', stamps: 8, earned: 0, redeemed: 0 },
     { name: 'Priya Raghunathan', email: 'priya.r@example.in', stamps: 1, earned: 2, redeemed: 1 },
   ];
@@ -517,12 +580,26 @@ async function main() {
       `;
     }
   }
-  console.info(`  ✓ ${cards.length} loyalty cards (${cards.map((c) => `${c.stamps}/9`).join(', ')})`);
+  console.info(
+    `  ✓ ${cards.length} loyalty cards (${cards.map((c) => `${c.stamps}/9`).join(', ')})`,
+  );
 
   /* ── Gift cards ─────────────────────────────────────────────────────── */
   const giftCards = [
-    { code: 'GC-4KP2XQ', initial: 25000, balance: 25000, purchaser: 'Claire Dubois', recipient: 'Karim Nasser' },
-    { code: 'GC-9TMV3B', initial: 50000, balance: 17500, purchaser: 'Daniel Okafor', recipient: null },
+    {
+      code: 'GC-4KP2XQ',
+      initial: 25000,
+      balance: 25000,
+      purchaser: 'Claire Dubois',
+      recipient: 'Karim Nasser',
+    },
+    {
+      code: 'GC-9TMV3B',
+      initial: 50000,
+      balance: 17500,
+      purchaser: 'Daniel Okafor',
+      recipient: null,
+    },
   ];
   for (const card of giftCards) {
     await sql`
@@ -566,7 +643,9 @@ async function main() {
       from generate_series(1, ${count})
     `;
   }
-  console.info(`  ✓ ${funnel.reduce((s, [, n]) => s + n, 0)} analytics events across ${funnel.length} funnel steps`);
+  console.info(
+    `  ✓ ${funnel.reduce((s, [, n]) => s + n, 0)} analytics events across ${funnel.length} funnel steps`,
+  );
 
   console.info('\n✓ Demo seeded.\n');
   console.info(`  Admin:  /signature/admin`);

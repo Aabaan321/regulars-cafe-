@@ -45,14 +45,14 @@ export function AdminShell({
           <Link href={publicHref} className="text-lg no-underline">
             <Logo showRing={false} />
           </Link>
-          <span className="text-faint border-line hidden border-s ps-4 text-2xs font-bold tracking-wider uppercase sm:inline">
+          <span className="text-faint border-line text-2xs hidden border-s ps-4 font-bold tracking-wider uppercase sm:inline">
             Staff
           </span>
 
           <div className="ms-auto flex items-center gap-3">
             <span className="text-muted hidden text-xs sm:inline">
               {identity.name}
-              <span className="text-faint ms-2 rounded-[var(--radius-xs)] border border-[var(--c-border)] px-1.5 py-0.5 text-2xs font-bold uppercase">
+              <span className="text-faint text-2xs ms-2 rounded-[var(--radius-xs)] border border-[var(--c-border)] px-1.5 py-0.5 font-bold uppercase">
                 {identity.role}
               </span>
             </span>
@@ -66,7 +66,7 @@ export function AdminShell({
         </div>
 
         <nav aria-label="Admin sections" className="border-line border-t">
-          <ul className="container-wide -mb-px flex gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <ul className="container-wide -mb-px flex [scrollbar-width:none] gap-1 overflow-x-auto [&::-webkit-scrollbar]:hidden">
             {nav.map((item) => {
               const active = current === item.href;
               return (
@@ -83,7 +83,7 @@ export function AdminShell({
                   >
                     {item.label}
                     {typeof item.badge === 'number' && item.badge > 0 ? (
-                      <span className="bg-accent text-accent-ink inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-2xs font-bold tabular-nums">
+                      <span className="bg-accent text-accent-ink text-2xs inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 font-bold tabular-nums">
                         {item.badge}
                       </span>
                     ) : null}
@@ -132,7 +132,7 @@ export function StatTile({
       >
         {value}
       </p>
-      {hint ? <p className="text-faint mt-1.5 text-2xs">{hint}</p> : null}
+      {hint ? <p className="text-faint text-2xs mt-1.5">{hint}</p> : null}
     </div>
   );
 }

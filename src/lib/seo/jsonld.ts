@@ -1,14 +1,6 @@
 import { brand, siteUrl } from '@/lib/config/brand';
-import {
-  menuCategories,
-  menuItems,
-  type DietaryTag,
-  type MenuItem,
-} from '@/lib/content/menu';
-import {
-  openingHoursSpecification,
-  specialOpeningHoursSpecification,
-} from '@/lib/utils/hours';
+import { menuCategories, menuItems, type DietaryTag, type MenuItem } from '@/lib/content/menu';
+import { openingHoursSpecification, specialOpeningHoursSpecification } from '@/lib/utils/hours';
 
 /**
  * Structured data.
@@ -78,9 +70,7 @@ export function cafeSchema(options?: { tier?: string; acceptsReservations?: bool
     hasMap: `https://www.google.com/maps/search/?api=1&query=${brand.geo.latitude},${brand.geo.longitude}`,
     openingHoursSpecification: openingHoursSpecification() as unknown as JsonValue,
     specialOpeningHoursSpecification: specialOpeningHoursSpecification() as unknown as JsonValue,
-    acceptsReservations: acceptsReservations
-      ? `${siteUrl}/signature/en/book`
-      : 'False',
+    acceptsReservations: acceptsReservations ? `${siteUrl}/signature/en/book` : 'False',
     hasMenu: `${siteUrl}/essential/menu`,
     sameAs,
     image: [
@@ -167,15 +157,16 @@ function menuItemNode(item: MenuItem): JsonLdNode {
       '@type': 'Offer',
       price: (item.priceFils / 100).toFixed(2),
       priceCurrency: brand.currencyCode,
-      availability: item.available
-        ? 'https://schema.org/InStock'
-        : 'https://schema.org/OutOfStock',
+      availability: item.available ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
     },
   };
 
   if (diets.length > 0) node.suitableForDiet = diets;
   if (item.allergens.length > 0) {
-    node.nutrition = { '@type': 'NutritionInformation', description: `Contains: ${item.allergens.join(', ')}` };
+    node.nutrition = {
+      '@type': 'NutritionInformation',
+      description: `Contains: ${item.allergens.join(', ')}`,
+    };
   }
   return node;
 }

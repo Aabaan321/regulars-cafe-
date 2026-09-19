@@ -37,9 +37,7 @@ export function SiteFooter({
           <Link href={base} className="text-xl no-underline">
             <Logo />
           </Link>
-          <p className="text-muted measure mt-3 text-xs leading-relaxed">
-            {brand.positioning}
-          </p>
+          <p className="text-muted measure mt-3 text-xs leading-relaxed">{brand.positioning}</p>
           <div className="mt-6">
             <NewsletterForm dict={dict} locale={locale} tier={tier} source="footer" />
           </div>
@@ -59,7 +57,10 @@ export function SiteFooter({
           </p>
           <ul className="mt-4 flex flex-col text-xs">
             <li>
-              <a href={telHref} className="hover:text-accent inline-flex min-h-6 items-center py-1 font-semibold no-underline">
+              <a
+                href={telHref}
+                className="hover:text-accent inline-flex min-h-6 items-center py-1 font-semibold no-underline"
+              >
                 {brand.contact.phoneDisplay}
               </a>
             </li>
@@ -145,7 +146,7 @@ export function SiteFooter({
       </div>
 
       <div className="border-line border-t">
-        <div className="container-wide text-faint flex flex-col gap-2 py-5 text-2xs sm:flex-row sm:items-center sm:justify-between">
+        <div className="container-wide text-faint text-2xs flex flex-col gap-2 py-5 sm:flex-row sm:items-center sm:justify-between">
           <p>
             © {year} {brand.legalName}. {dict.footer.rights}
           </p>

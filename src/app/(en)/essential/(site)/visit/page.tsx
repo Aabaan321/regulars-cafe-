@@ -85,21 +85,15 @@ export default function VisitPage() {
             <div className="mt-8 grid gap-6 sm:grid-cols-2">
               <div>
                 <h2 className="eyebrow mb-2">Parking</h2>
-                <p className="text-muted text-xs leading-relaxed">
-                  {brand.service.parking}
-                </p>
+                <p className="text-muted text-xs leading-relaxed">{brand.service.parking}</p>
               </div>
               <div>
                 <h2 className="eyebrow mb-2">By metro</h2>
-                <p className="text-muted text-xs leading-relaxed">
-                  {brand.service.metro}
-                </p>
+                <p className="text-muted text-xs leading-relaxed">{brand.service.metro}</p>
               </div>
               <div>
                 <h2 className="eyebrow mb-2">Accessibility</h2>
-                <p className="text-muted text-xs leading-relaxed">
-                  {brand.service.accessibility}
-                </p>
+                <p className="text-muted text-xs leading-relaxed">{brand.service.accessibility}</p>
               </div>
               <div>
                 <h2 className="eyebrow mb-2">Working from here</h2>
@@ -141,7 +135,7 @@ export default function VisitPage() {
                 </tbody>
               </table>
 
-              <p className="text-faint mt-3 text-2xs">
+              <p className="text-faint text-2xs mt-3">
                 The kitchen closes 45 minutes before the café.
               </p>
 
@@ -156,16 +150,12 @@ export default function VisitPage() {
                       >
                         <span className="text-muted">
                           <span className="text-ink block font-semibold">{exception.label}</span>
-                          <span className="text-faint text-2xs tabular-nums">
-                            {exception.date}
-                          </span>
+                          <span className="text-faint text-2xs tabular-nums">{exception.date}</span>
                         </span>
                         <span className="text-ink shrink-0 font-semibold tabular-nums">
                           {exception.windows.length === 0
                             ? 'Closed'
-                            : exception.windows
-                                .map((w) => `${w.open}–${w.close}`)
-                                .join(', ')}
+                            : exception.windows.map((w) => `${w.open}–${w.close}`).join(', ')}
                         </span>
                       </li>
                     ))}

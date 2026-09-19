@@ -130,7 +130,9 @@ async function grantAppLoginRoles(): Promise<void> {
   // Identifiers cannot be parameterised. The value comes from our own
   // DATABASE_URL, and is additionally constrained to a plain identifier.
   if (!/^[a-z_][a-z0-9_]*$/i.test(user)) {
-    console.warn(`  ! DATABASE_URL user "${user}" is not a plain identifier — skipping role grants.`);
+    console.warn(
+      `  ! DATABASE_URL user "${user}" is not a plain identifier — skipping role grants.`,
+    );
     return;
   }
 

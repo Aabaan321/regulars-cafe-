@@ -1,17 +1,16 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useClientValue } from '@/lib/hooks/use-client-value';
 import { brand } from '@/lib/config/brand';
 import type { Dictionary } from '@/lib/i18n/dictionaries';
 
 /** Copy-to-clipboard for the address, with a real confirmation state. */
 export function CopyAddress({ dict }: { dict: Dictionary }) {
   const [copied, setCopied] = useState(false);
-  const [supported, setSupported] = useState(true);
-
-  useEffect(() => {
-    setSupported(typeof navigator !== 'undefined' && Boolean(navigator.clipboard));
-  }, []);
+  // Rendered as supported on the server so the button is in the markup, then
+  // corrected on the client if the Clipboard API is genuinely unavailable.
+  const supported = useClientValue(() => Boolean(navigator.clipboard), true);
 
   useEffect(() => {
     if (!copied) return;

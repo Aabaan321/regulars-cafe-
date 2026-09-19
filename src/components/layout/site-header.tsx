@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useScrolledPast } from '@/lib/hooks/use-client-value';
 import { Logo } from '@/components/ui/logo';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
 import { navFor, tierBase, type TierId } from '@/lib/config/navigation';
@@ -29,18 +30,18 @@ export function SiteHeader({
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const scrolled = useScrolledPast(8);
   const base = tierBase(tier, locale);
   const items = navFor(tier);
 
-  useEffect(() => setOpen(false), [pathname]);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+  // Close the mobile menu when the route changes. Adjusting state during
+  // render — React's documented pattern for "reset when a prop changes" — so
+  // the panel never paints open on the new page first.
+  const [lastPathname, setLastPathname] = useState(pathname);
+  if (pathname !== lastPathname) {
+    setLastPathname(pathname);
+    if (open) setOpen(false);
+  }
 
   useEffect(() => {
     if (!open) return;
@@ -67,9 +68,7 @@ export function SiteHeader({
         // Always translucent rather than transparent-until-scrolled: the hero
         // photograph underneath can be light or dark, and a header that only
         // works over one of them is a header that breaks on the next page.
-        scrolled
-          ? 'border-line bg-bg/88 shadow-[var(--elev-1)]'
-          : 'bg-bg/72 border-transparent',
+        scrolled ? 'border-line bg-bg/88 shadow-[var(--elev-1)]' : 'bg-bg/72 border-transparent',
       ].join(' ')}
       data-scrolled={scrolled}
     >
@@ -131,11 +130,7 @@ export function SiteHeader({
         </div>
       </div>
 
-      <div
-        id="mobile-nav"
-        hidden={!open}
-        className="border-line bg-bg border-t lg:hidden"
-      >
+      <div id="mobile-nav" hidden={!open} className="border-line bg-bg border-t lg:hidden">
         <nav aria-label={`${dict.nav.primaryLabel} — mobile`} className="container-page py-3">
           <ul className="flex flex-col">
             {items.map((item) => (

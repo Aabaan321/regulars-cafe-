@@ -65,11 +65,7 @@ export function OpenNow({
         aria-hidden="true"
         className={[
           'inline-block size-2 shrink-0 rounded-full',
-          tone === 'open'
-            ? 'bg-success'
-            : tone === 'soon'
-              ? 'bg-warning'
-              : 'bg-dot-idle',
+          tone === 'open' ? 'bg-success' : tone === 'soon' ? 'bg-warning' : 'bg-dot-idle',
         ].join(' ')}
       />
       <span className="font-semibold" suppressHydrationWarning>

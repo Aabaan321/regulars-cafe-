@@ -31,18 +31,15 @@ export function RootShell({
 
   return (
     <html lang={meta.htmlLang} dir={meta.dir} className={fontClassName} suppressHydrationWarning>
+      {/* eslint-disable-next-line @next/next/no-head-element --
+          `next/head` is the Pages Router API. In an App Router root layout
+          <head> is the correct and only way to render into the document head. */}
       <head>
         {/* Colour tokens, generated from brand.ts. Inline so there is no
             second request and no flash of the wrong palette. */}
-        <style
-          // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{ __html: themeCss() }}
-        />
+        <style dangerouslySetInnerHTML={{ __html: themeCss() }} />
         {/* Applies the stored theme before first paint. */}
-        <script
-          // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{ __html: themeInitScript }}
-        />
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body className="flex min-h-dvh flex-col">
         <SkipLink label={dict.nav.skipToContent} />

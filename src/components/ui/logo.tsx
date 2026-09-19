@@ -5,7 +5,13 @@ import { brand } from '@/lib/config/brand';
  * counter — drawn as text plus one SVG ring rather than an image so it stays
  * crisp, themeable and selectable.
  */
-export function Logo({ className = '', showRing = true }: { className?: string; showRing?: boolean }) {
+export function Logo({
+  className = '',
+  showRing = true,
+}: {
+  className?: string;
+  showRing?: boolean;
+}) {
   return (
     <span
       className={`font-display relative inline-flex items-baseline leading-none font-semibold tracking-[-0.03em] ${className}`}

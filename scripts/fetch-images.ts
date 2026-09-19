@@ -78,7 +78,11 @@ async function main() {
     blur[image.key] = `data:image/webp;base64,${tiny.toString('base64')}`;
   }
 
-  const ordered = Object.fromEntries(Object.keys(blur).sort().map((k) => [k, blur[k]]));
+  const ordered = Object.fromEntries(
+    Object.keys(blur)
+      .sort()
+      .map((k) => [k, blur[k]]),
+  );
   await writeFile(BLUR_FILE, `${JSON.stringify(ordered, null, 2)}\n`, 'utf8');
 
   console.info(`\n✓ ${fetched} downloaded, ${skipped} already present.`);

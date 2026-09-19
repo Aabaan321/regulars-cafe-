@@ -62,7 +62,17 @@ export async function GET(request: Request) {
       `;
       return {
         csv: toCsv(
-          ['created_at', 'name', 'email', 'phone', 'topic', 'status', 'source_tier', 'locale', 'message'],
+          [
+            'created_at',
+            'name',
+            'email',
+            'phone',
+            'topic',
+            'status',
+            'source_tier',
+            'locale',
+            'message',
+          ],
           rows,
         ),
         filename: 'regulars-enquiries',
@@ -77,7 +87,17 @@ export async function GET(request: Request) {
     `;
     return {
       csv: toCsv(
-        ['created_at', 'email', 'name', 'status', 'source', 'source_tier', 'locale', 'confirmed_at', 'unsubscribed_at'],
+        [
+          'created_at',
+          'email',
+          'name',
+          'status',
+          'source',
+          'source_tier',
+          'locale',
+          'confirmed_at',
+          'unsubscribed_at',
+        ],
         rows,
       ),
       filename: 'regulars-subscribers',

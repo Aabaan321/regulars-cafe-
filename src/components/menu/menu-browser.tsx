@@ -66,7 +66,7 @@ export function MenuBrowser({
       <div className="border-line bg-bg/92 sticky top-[var(--header-h)] z-20 -mx-[var(--gutter)] border-b px-[var(--gutter)] py-3 backdrop-blur-md">
         <h2 className="sr-only">{dict.menu.filterHeading}</h2>
 
-        <div className="-mx-1 flex snap-x gap-1.5 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="-mx-1 flex snap-x [scrollbar-width:none] gap-1.5 overflow-x-auto px-1 pb-1 [&::-webkit-scrollbar]:hidden">
           <button
             type="button"
             className="chip snap-start"
@@ -90,7 +90,7 @@ export function MenuBrowser({
 
         {availableDiets.length > 0 ? (
           <div className="mt-2 flex flex-wrap items-center gap-1.5">
-            <span className="text-faint me-1 text-2xs font-bold tracking-wide uppercase">
+            <span className="text-faint text-2xs me-1 font-bold tracking-wide uppercase">
               {dict.menu.dietaryHeading}
             </span>
             {availableDiets.map((tag) => (
@@ -107,7 +107,7 @@ export function MenuBrowser({
             {diets.length > 0 ? (
               <button
                 type="button"
-                className="text-accent ms-1 text-2xs font-bold underline"
+                className="text-accent text-2xs ms-1 font-bold underline"
                 onClick={() => setDiets([])}
               >
                 {dict.menu.clearFilters}
@@ -124,9 +124,7 @@ export function MenuBrowser({
       {filtered.length === 0 ? (
         <div className="border-line bg-bg-subtle mt-10 rounded-[var(--radius-lg)] border border-dashed p-10 text-center">
           <p className="font-display text-xl">{dict.menu.noResults}</p>
-          <p className="text-muted mx-auto mt-2 max-w-[28rem] text-xs">
-            {dict.menu.noResultsHint}
-          </p>
+          <p className="text-muted mx-auto mt-2 max-w-[28rem] text-xs">{dict.menu.noResultsHint}</p>
           <button
             type="button"
             className="btn btn-secondary btn-sm mt-5"
@@ -141,7 +139,11 @@ export function MenuBrowser({
       ) : (
         <div className="mt-10 flex flex-col gap-[var(--space-2xl)]">
           {filtered.map((category) => (
-            <section key={category.id} id={`category-${category.id}`} aria-labelledby={`h-${category.id}`}>
+            <section
+              key={category.id}
+              id={`category-${category.id}`}
+              aria-labelledby={`h-${category.id}`}
+            >
               <header className="mb-4">
                 <h3 id={`h-${category.id}`} className="display-3">
                   {category.name}
@@ -152,9 +154,7 @@ export function MenuBrowser({
                   </p>
                 ) : null}
                 {category.serviceNote ? (
-                  <p className="text-accent mt-2 text-2xs font-bold">
-                    {category.serviceNote}
-                  </p>
+                  <p className="text-accent text-2xs mt-2 font-bold">{category.serviceNote}</p>
                 ) : null}
               </header>
               <ul className="flex flex-col">
@@ -173,7 +173,7 @@ export function MenuBrowser({
         </div>
       )}
 
-      <p className="text-faint measure mt-[var(--space-xl)] text-2xs leading-relaxed">
+      <p className="text-faint measure text-2xs mt-[var(--space-xl)] leading-relaxed">
         {dict.menu.allergenNote}
       </p>
     </div>

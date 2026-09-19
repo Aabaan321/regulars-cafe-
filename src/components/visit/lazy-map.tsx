@@ -16,7 +16,15 @@ import type { Dictionary } from '@/lib/i18n/dictionaries';
  *
  * Nothing loads from a third party until that click.
  */
-export function LazyMap({ dict, previewSrc, previewBlur }: { dict: Dictionary; previewSrc: string; previewBlur: string }) {
+export function LazyMap({
+  dict,
+  previewSrc,
+  previewBlur,
+}: {
+  dict: Dictionary;
+  previewSrc: string;
+  previewBlur: string;
+}) {
   const [loaded, setLoaded] = useState(false);
   const embedSrc = `https://www.google.com/maps?q=${brand.geo.latitude},${brand.geo.longitude}&z=${brand.geo.mapZoom}&output=embed`;
 

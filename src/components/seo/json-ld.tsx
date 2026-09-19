@@ -13,7 +13,7 @@ export function JsonLd({ data, id }: { data: JsonLdNode | readonly JsonLdNode[];
     <script
       type="application/ld+json"
       id={id}
-      // eslint-disable-next-line react/no-danger
+
       dangerouslySetInnerHTML={{ __html: payload }}
     />
   );

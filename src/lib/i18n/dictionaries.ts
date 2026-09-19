@@ -12,7 +12,10 @@
 export type Locale = 'en' | 'ar';
 export const LOCALES: readonly Locale[] = ['en', 'ar'];
 
-export const localeMeta: Record<Locale, { label: string; nativeLabel: string; dir: 'ltr' | 'rtl'; htmlLang: string }> = {
+export const localeMeta: Record<
+  Locale,
+  { label: string; nativeLabel: string; dir: 'ltr' | 'rtl'; htmlLang: string }
+> = {
   en: { label: 'English', nativeLabel: 'English', dir: 'ltr', htmlLang: 'en-AE' },
   ar: { label: 'Arabic', nativeLabel: 'العربية', dir: 'rtl', htmlLang: 'ar-AE' },
 };
@@ -133,7 +136,8 @@ const en = {
     guests: 'guests',
     guest: 'guest',
     chooseParty: 'How many of you?',
-    choosePartyHint: 'Up to 8 online. For 9 or more we will look after you properly — use private hire.',
+    choosePartyHint:
+      'Up to 8 online. For 9 or more we will look after you properly — use private hire.',
     chooseDate: 'Which day?',
     chooseTime: 'What time?',
     chooseTimeHint: 'Times shown are for a table of',

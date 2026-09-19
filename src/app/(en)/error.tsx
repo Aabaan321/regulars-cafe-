@@ -46,9 +46,7 @@ export default function ErrorBoundary({
         </div>
 
         {error.digest ? (
-          <p className="text-faint mt-8 font-mono text-2xs">
-            Reference: {error.digest}
-          </p>
+          <p className="text-faint text-2xs mt-8 font-mono">Reference: {error.digest}</p>
         ) : null}
       </div>
     </main>

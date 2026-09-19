@@ -5,7 +5,7 @@ three times over at three levels of ambition, in one Next.js app. Every tier is
 a real site — real database, real forms, real bookings. Nothing is faked.
 
 > **Status:** Tier 1 (Essential) is complete and verified. Tier 2 (Signature)
-> and Tier 3 (Immersive) are in progress — see *What works today* below.
+> and Tier 3 (Immersive) are in progress — see _What works today_ below.
 
 ---
 
@@ -36,27 +36,27 @@ npm run seed          # a believable week of trade — see below
 npm run dev           # http://localhost:3000
 ```
 
-| Command | What it does |
-| --- | --- |
-| `npm run dev` | Development server |
-| `npm run build` | Production build |
-| `npm run verify` | typecheck + lint + build |
-| `npm run db:migrate` | Apply pending migrations |
-| `npm run db:reset` | Drop and rebuild the schema from scratch |
-| `npm run seed` | Fill the demo with data |
-| `npm run reset-demo` | Wipe demo data and re-seed, so the pitch can run twice |
-| `npm run images:fetch` | Re-download and re-optimise all photography |
+| Command                | What it does                                           |
+| ---------------------- | ------------------------------------------------------ |
+| `npm run dev`          | Development server                                     |
+| `npm run build`        | Production build                                       |
+| `npm run verify`       | typecheck + lint + build                               |
+| `npm run db:migrate`   | Apply pending migrations                               |
+| `npm run db:reset`     | Drop and rebuild the schema from scratch               |
+| `npm run seed`         | Fill the demo with data                                |
+| `npm run reset-demo`   | Wipe demo data and re-seed, so the pitch can run twice |
+| `npm run images:fetch` | Re-download and re-optimise all photography            |
 
 ### Demo logins
 
 All three use the password `RegularsDemo!2026` (override with
 `DEMO_ADMIN_PASSWORD` before seeding):
 
-| Email | Role | Sees |
-| --- | --- | --- |
-| `owner@regulars.ae` | owner | Everything, including staff management |
-| `manager@regulars.ae` | manager | Everything except staff management |
-| `floor@regulars.ae` | staff | Today's bookings and the order queue |
+| Email                 | Role    | Sees                                   |
+| --------------------- | ------- | -------------------------------------- |
+| `owner@regulars.ae`   | owner   | Everything, including staff management |
+| `manager@regulars.ae` | manager | Everything except staff management     |
+| `floor@regulars.ae`   | staff   | Today's bookings and the order queue   |
 
 Tier 1 admin: **`/essential/admin`**
 
@@ -66,31 +66,33 @@ Tier 1 admin: **`/essential/admin`**
 
 ### Tier 1 — Essential ✅ complete and verified
 
-| Route | |
-| --- | --- |
-| `/essential` | Home — hero, signature plates, story teaser, hours, Instagram, FAQ |
-| `/essential/menu` | 46 items, category tabs, dietary filters, AED prices, allergens |
-| `/essential/story` | Founder narrative, sourcing, roasting, the team |
-| `/essential/gallery` | Masonry grid + keyboard-navigable lightbox |
-| `/essential/visit` | Lazy map, hours, live open/closed, contact form, FAQ |
-| `/essential/specialty-coffee-al-quoz` | Neighbourhood SEO landing page |
-| `/essential/newsletter` | Double opt-in sign-up and confirmation outcomes |
-| `/essential/admin` | Enquiries + subscribers, CSV export |
+| Route                                 |                                                                    |
+| ------------------------------------- | ------------------------------------------------------------------ |
+| `/essential`                          | Home — hero, signature plates, story teaser, hours, Instagram, FAQ |
+| `/essential/menu`                     | 46 items, category tabs, dietary filters, AED prices, allergens    |
+| `/essential/story`                    | Founder narrative, sourcing, roasting, the team                    |
+| `/essential/gallery`                  | Masonry grid + keyboard-navigable lightbox                         |
+| `/essential/visit`                    | Lazy map, hours, live open/closed, contact form, FAQ               |
+| `/essential/specialty-coffee-al-quoz` | Neighbourhood SEO landing page                                     |
+| `/essential/newsletter`               | Double opt-in sign-up and confirmation outcomes                    |
+| `/essential/admin`                    | Enquiries + subscribers, CSV export                                |
 
-Verified end to end (11/11 automated checks): contact form → database → email
-log; newsletter double opt-in including single-use replay protection; honeypot
+Verified end to end in a real browser: contact form → database → email log;
+newsletter double opt-in including single-use replay protection; honeypot
 rejection; admin auth; CSV export including a 401 for signed-out visitors.
+Also verified that with no `DATABASE_URL` the static pages still serve and the
+forms show a designed message rather than a 500.
 
 **Lighthouse, mobile emulation:**
 
-| Page | Perf | A11y | Best Practices | SEO | LCP | CLS |
-| --- | --- | --- | --- | --- | --- | --- |
-| `/essential` | 92 | 100 | 100 | 100 | 3.36s | 0.000 |
-| `/essential/menu` | 93 | 96 | 100 | 100 | 3.21s | 0.000 |
-| `/essential/visit` | 94 | 100 | 100 | 100 | 3.08s | 0.000 |
-| `/essential/story` | 93 | 100 | 100 | 100 | 3.29s | 0.000 |
-| `/essential/gallery` | 89 | 100 | 100 | 100 | 3.85s | 0.000 |
-| `/essential/specialty-coffee-al-quoz` | 94 | 100 | 100 | 100 | 3.08s | 0.000 |
+| Page                                  | Perf | A11y | Best Practices | SEO | LCP   | CLS   |
+| ------------------------------------- | ---- | ---- | -------------- | --- | ----- | ----- |
+| `/essential`                          | 92   | 100  | 100            | 100 | 3.36s | 0.000 |
+| `/essential/menu`                     | 93   | 96   | 100            | 100 | 3.21s | 0.000 |
+| `/essential/visit`                    | 94   | 100  | 100            | 100 | 3.08s | 0.000 |
+| `/essential/story`                    | 93   | 100  | 100            | 100 | 3.29s | 0.000 |
+| `/essential/gallery`                  | 89   | 100  | 100            | 100 | 3.85s | 0.000 |
+| `/essential/specialty-coffee-al-quoz` | 94   | 100  | 100            | 100 | 3.08s | 0.000 |
 
 Performance is short of the ≥95 target and LCP short of <2.0s; both are being
 worked. CLS is 0.000 across every page and SEO is 100 everywhere.
@@ -177,10 +179,10 @@ the blur placeholders.
 
 Stripe runs in **test mode only**. Never put a live key in this project.
 
-| Card | Result |
-| --- | --- |
-| `4242 4242 4242 4242` | Succeeds |
-| `4000 0000 0000 9995` | Declined — insufficient funds |
+| Card                  | Result                            |
+| --------------------- | --------------------------------- |
+| `4242 4242 4242 4242` | Succeeds                          |
+| `4000 0000 0000 9995` | Declined — insufficient funds     |
 | `4000 0025 0000 3155` | Requires 3D Secure authentication |
 
 Any future expiry, any CVC, any postcode.

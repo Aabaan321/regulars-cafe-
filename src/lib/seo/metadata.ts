@@ -37,9 +37,7 @@ export interface BuildMetadataOptions {
 function warnIfTooLong(kind: string, value: string, limit: number, path: string): void {
   if (process.env.NODE_ENV === 'production') return;
   if (value.length > limit) {
-    console.warn(
-      `[seo] ${kind} for ${path} is ${value.length} chars (limit ${limit}): "${value}"`,
-    );
+    console.warn(`[seo] ${kind} for ${path} is ${value.length} chars (limit ${limit}): "${value}"`);
   }
 }
 

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { readStorage, useClientValue, writeStorage } from '@/lib/hooks/use-client-value';
 import { tierOrder, tiers, type TierId } from '@/lib/config/navigation';
 
 /**
@@ -20,6 +21,11 @@ import { tierOrder, tiers, type TierId } from '@/lib/config/navigation';
 
 const STORAGE_KEY = 'regulars-tier-switcher';
 type PillState = 'expanded' | 'collapsed' | 'hidden';
+
+function readStoredState(): PillState {
+  const stored = readStorage(STORAGE_KEY);
+  return stored === 'expanded' || stored === 'hidden' ? stored : 'collapsed';
+}
 
 /** '/essential/menu' → '/menu'; the Arabic routes carry an /ar prefix. */
 function subPath(pathname: string): string {
@@ -44,28 +50,16 @@ function targetFor(tier: TierId, pathname: string): string {
 
 export function TierSwitcher({ current }: { current: TierId }) {
   const pathname = usePathname();
-  const [state, setState] = useState<PillState>('collapsed');
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored === 'expanded' || stored === 'collapsed' || stored === 'hidden') {
-        setState(stored);
-      }
-    } catch {
-      /* storage blocked */
-    }
-  }, []);
+  // 'ssr' until the client snapshot arrives, so the pill is not rendered into
+  // the server HTML at all — it is a presenter control, not page content, and
+  // it should never appear in a crawl or a print.
+  const stored = useClientValue(readStoredState, 'ssr');
+  const [override, setOverride] = useState<PillState | null>(null);
+  const state: PillState | 'ssr' = override ?? stored;
 
   function persist(next: PillState) {
-    setState(next);
-    try {
-      localStorage.setItem(STORAGE_KEY, next);
-    } catch {
-      /* ignore */
-    }
+    setOverride(next);
+    writeStorage(STORAGE_KEY, next);
   }
 
   // Keyboard shortcut for the presenter: ⌥1 / ⌥2 / ⌥3.
@@ -83,8 +77,8 @@ export function TierSwitcher({ current }: { current: TierId }) {
     return () => window.removeEventListener('keydown', onKey);
   }, [current, pathname]);
 
-  if (!mounted || state === 'hidden') {
-    return mounted ? (
+  if (state === 'ssr' || state === 'hidden') {
+    return state === 'hidden' ? (
       <button
         type="button"
         onClick={() => persist('collapsed')}
@@ -116,10 +110,8 @@ export function TierSwitcher({ current }: { current: TierId }) {
                   aria-current={active ? 'true' : undefined}
                   title={`${tiers[tier].name} — ${tiers[tier].positioning} (⌥${i + 1})`}
                   className={[
-                    'rounded-[var(--radius-pill)] px-3 py-1.5 text-2xs font-bold no-underline transition-colors',
-                    active
-                      ? 'bg-ink text-bg'
-                      : 'text-muted hover:bg-bg-subtle hover:text-ink',
+                    'text-2xs rounded-[var(--radius-pill)] px-3 py-1.5 font-bold no-underline transition-colors',
+                    active ? 'bg-ink text-bg' : 'text-muted hover:bg-bg-subtle hover:text-ink',
                   ].join(' ')}
                 >
                   <span className="text-faint me-1 tabular-nums">{i + 1}</span>
@@ -151,7 +143,7 @@ export function TierSwitcher({ current }: { current: TierId }) {
           <button
             type="button"
             onClick={() => persist('expanded')}
-            className="text-muted hover:text-ink flex items-center gap-2 rounded-[var(--radius-pill)] px-3 py-1.5 text-2xs font-bold"
+            className="text-muted hover:text-ink text-2xs flex items-center gap-2 rounded-[var(--radius-pill)] px-3 py-1.5 font-bold"
           >
             <span className="bg-accent inline-block size-1.5 rounded-full" aria-hidden="true" />
             Tier {tiers[current].ordinal} · {tiers[current].name}

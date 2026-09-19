@@ -157,7 +157,10 @@ export function bookingConfirmationEmail(input: {
           ...(input.specialRequests
             ? ([['Your note', escapeHtml(input.specialRequests)]] as const)
             : []),
-          ['Reference', `<code style="font-family:ui-monospace,monospace;letter-spacing:0.06em;">${escapeHtml(input.reference)}</code>`],
+          [
+            'Reference',
+            `<code style="font-family:ui-monospace,monospace;letter-spacing:0.06em;">${escapeHtml(input.reference)}</code>`,
+          ],
           ['Where', `<a href="${directionsHref}">${escapeHtml(brand.address.formatted)}</a>`],
         ]) +
         `<p style="margin:0;font-size:13px;">We hold the table for 15 minutes. If you are running late, WhatsApp us on ${escapeHtml(brand.contact.whatsappDisplay)} and we will keep it.</p>`,
@@ -333,7 +336,10 @@ export function orderConfirmationEmail(input: {
         `<p style="margin:0 0 4px;">Thanks ${escapeHtml(input.guestName.split(' ')[0] ?? input.guestName)} — the kitchen has it.</p>` +
         detailTable([
           ['Collect at', escapeHtml(dubaiDateTime(input.pickupAt, input.locale))],
-          ['Order', `<code style="font-family:ui-monospace,monospace;">${escapeHtml(input.reference)}</code>`],
+          [
+            'Order',
+            `<code style="font-family:ui-monospace,monospace;">${escapeHtml(input.reference)}</code>`,
+          ],
           ['From', escapeHtml(brand.address.formatted)],
         ]) +
         orderLinesHtml(input.lines) +
@@ -363,7 +369,10 @@ export function kitchenOrderEmail(input: {
       heading: `Order ${input.reference}`,
       bodyHtml:
         detailTable([
-          ['Collect at', `<strong style="font-size:17px;">${escapeHtml(dubaiDateTime(input.pickupAt, 'en'))}</strong>`],
+          [
+            'Collect at',
+            `<strong style="font-size:17px;">${escapeHtml(dubaiDateTime(input.pickupAt, 'en'))}</strong>`,
+          ],
           ['Guest', escapeHtml(input.guestName)],
           ['Phone', `<a href="tel:${escapeHtml(input.phone)}">${escapeHtml(input.phone)}</a>`],
         ]) +
@@ -433,7 +442,9 @@ export function loyaltyCardEmail(input: {
     subject: `Your stamp card — ${input.stamps}/9 — ${brand.name}`,
     html: renderEmail({
       preheader:
-        remaining === 0 ? 'Your free coffee is waiting.' : `${remaining} more and the next one is on us.`,
+        remaining === 0
+          ? 'Your free coffee is waiting.'
+          : `${remaining} more and the next one is on us.`,
       heading: remaining === 0 ? 'Your free coffee is waiting' : `${input.stamps} of 9`,
       bodyHtml: `<p style="margin:0 0 12px;">${
         remaining === 0
@@ -465,7 +476,10 @@ export function eventEnquiryAlertEmail(input: {
       heading: 'New private hire enquiry',
       bodyHtml:
         detailTable([
-          ['Routed to', `<strong>${escapeHtml(input.routedTo.replace(/_/g, ' '))}</strong> — ${escapeHtml(input.routingReason)}`],
+          [
+            'Routed to',
+            `<strong>${escapeHtml(input.routedTo.replace(/_/g, ' '))}</strong> — ${escapeHtml(input.routingReason)}`,
+          ],
           ['Name', escapeHtml(input.name)],
           ['Email', `<a href="mailto:${escapeHtml(input.email)}">${escapeHtml(input.email)}</a>`],
           ['Phone', escapeHtml(input.phone)],

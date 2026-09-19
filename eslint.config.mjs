@@ -1,17 +1,23 @@
-import { dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { FlatCompat } from '@eslint/eslintrc';
+import nextCoreWebVitals from 'eslint-config-next/core-web-vitals';
+import nextTypescript from 'eslint-config-next/typescript';
+import prettier from 'eslint-config-prettier';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({ baseDirectory: __dirname });
-
+/**
+ * Flat config, composed directly.
+ *
+ * eslint-config-next 16 ships native flat configs, so they are spread in as
+ * arrays. Wrapping them in FlatCompat — the pattern from the ESLint 8 era —
+ * crashes with "Converting circular structure to JSON", because the compat
+ * layer tries to serialise a config that already contains resolved plugin
+ * objects.
+ */
 const config = [
   {
     ignores: ['.next/**', 'node_modules/**', 'out/**', 'next-env.d.ts', 'lighthouse/**'],
   },
-  ...compat.extends('next/core-web-vitals', 'next/typescript', 'prettier'),
+  ...nextCoreWebVitals,
+  ...nextTypescript,
+  prettier,
   {
     rules: {
       // `any` is banned outright. Where a third-party type is genuinely
@@ -20,10 +26,6 @@ const config = [
       '@typescript-eslint/no-unused-vars': [
         'error',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },
-      ],
-      '@typescript-eslint/consistent-type-imports': [
-        'warn',
-        { prefer: 'type-imports', fixStyle: 'inline-type-imports' },
       ],
       'no-console': ['warn', { allow: ['warn', 'error', 'info'] }],
       eqeqeq: ['error', 'always', { null: 'ignore' }],
