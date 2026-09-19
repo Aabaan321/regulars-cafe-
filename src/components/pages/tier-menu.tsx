@@ -6,7 +6,11 @@ import { menuCategories, itemsByCategory } from '@/lib/content/menu';
 import { getImage } from '@/lib/content/images';
 import { getDictionary, type Locale } from '@/lib/i18n/dictionaries';
 import { breadcrumbSchema, menuSchema } from '@/lib/seo/jsonld';
-import { tierHref, type TierId } from '@/lib/config/navigation';
+import { featuresFor, tierHref, type TierId } from '@/lib/config/navigation';
+import { SourcingSection } from '@/components/sections/sourcing-table';
+import { AllergenMatrix } from '@/components/menu/allergen-matrix';
+import { PickupBanner } from '@/components/menu/pickup-banner';
+import { SignatureShowcase } from '@/components/menu/signature-showcase';
 import { isDatabaseConfigured } from '@/lib/db/client';
 import type { MenuItemView } from '@/components/menu/menu-item-card';
 
@@ -17,10 +21,18 @@ import type { MenuItemView } from '@/components/menu/menu-item-card';
  * reads `menu_items` — which is what the admin menu editor writes to. If there
  * is no database (a preview deployment), it falls back to the same content
  * file Tier 1 uses, so the page is never empty.
+ *
+ * The page also gets materially deeper with the tier. Tier 1 is the menu:
+ * what it costs and what is in it, which is what a guest needs. Tier 2 adds
+ * the things a café can only publish if it owns its own content — the lots on
+ * the bar with what was paid for them, a full allergen grid, and ordering —
+ * so the shared route is visibly a different page rather than the same one
+ * behind a more expensive price.
  */
 export async function TierMenuPage({ tier, locale }: { tier: TierId; locale: Locale }) {
   const dict = getDictionary(locale);
   const ar = locale === 'ar';
+  const features = featuresFor(tier);
 
   const categories = isDatabaseConfigured()
     ? (await getMenu(locale)).map((category) => ({
@@ -98,9 +110,17 @@ export async function TierMenuPage({ tier, locale }: { tier: TierId; locale: Loc
         }
       />
 
+      {features.menuOrdering ? <PickupBanner tier={tier} locale={locale} /> : null}
+
       <div className="container-page pt-[var(--space-xl)] pb-[var(--section-y)]">
         <MenuBrowser categories={categories} dict={dict} locale={locale} showImages />
       </div>
+
+      {features.menuShowcase ? <SignatureShowcase locale={locale} /> : null}
+      {features.menuSourcing ? <SourcingSection locale={locale} /> : null}
+      {features.menuAllergenMatrix ? (
+        <AllergenMatrix categories={categories} locale={locale} />
+      ) : null}
     </>
   );
 }

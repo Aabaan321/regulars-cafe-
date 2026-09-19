@@ -22,6 +22,52 @@ export interface TierDefinition {
   readonly heroImageKey: string;
   readonly priceFrom: string;
   readonly timeline: string;
+  readonly features: TierFeatures;
+}
+
+/**
+ * What each tier's pages actually contain.
+ *
+ * The shared pages used to render identically at every tier, which made the
+ * expensive tiers look like the cheap one with extra routes bolted on — a
+ * fatal thing for a sales asset, because the client's whole question is
+ * "what does the extra money buy?"
+ *
+ * So depth is a declared capability, read by the page components. A page asks
+ * `features.menuSourcing` and renders the farm cards or does not. Adding a
+ * section to Tier 2 is a boolean here and a guard there, not a fork of the
+ * page — which is also the honest engineering answer, since all three tiers
+ * are one codebase.
+ *
+ * The rule for where a feature lands: Tier 1 gets everything a guest needs
+ * to decide to come. Tier 2 adds everything the café needs to *run* on the
+ * site. Tier 3 adds everything that makes someone send it to a friend.
+ */
+export interface TierFeatures {
+  /** Menu: provenance cards for the lots currently on the brew bar. */
+  readonly menuSourcing: boolean;
+  /** Menu: what the kitchen suggests alongside each signature. */
+  readonly menuPairings: boolean;
+  /** Menu: the full allergen grid, not just per-item chips. */
+  readonly menuAllergenMatrix: boolean;
+  /** Menu: pickup ordering. */
+  readonly menuOrdering: boolean;
+  /** Story: the dated build-out timeline. */
+  readonly storyTimeline: boolean;
+  /** Story: who actually works here. */
+  readonly storyTeam: boolean;
+  /** Visit: getting here by metro, taxi, car and bike. */
+  readonly visitTransport: boolean;
+  /** Visit: step-free access, hearing loop, the honest caveats. */
+  readonly visitAccessibility: boolean;
+  /** Visit: which room to ask for, and what each seats. */
+  readonly visitRooms: boolean;
+  /** Booking: choose your actual table off a live plan of the room. */
+  readonly bookingFloorPlan: boolean;
+  /** Menu: a full-bleed editorial spread of the signatures. */
+  readonly menuShowcase: boolean;
+  /** Chrome: sections reveal on scroll rather than simply being there. */
+  readonly scrollReveal: boolean;
 }
 
 export const tiers: Record<TierId, TierDefinition> = {
@@ -42,6 +88,20 @@ export const tiers: Record<TierId, TierDefinition> = {
     heroImageKey: 'spaceMorning',
     priceFrom: 'AED 9,500',
     timeline: '2–3 weeks',
+    features: {
+      menuSourcing: false,
+      menuPairings: false,
+      menuAllergenMatrix: false,
+      menuOrdering: false,
+      storyTimeline: false,
+      storyTeam: false,
+      visitTransport: false,
+      visitAccessibility: false,
+      visitRooms: false,
+      bookingFloorPlan: false,
+      menuShowcase: false,
+      scrollReveal: false,
+    },
   },
   signature: {
     id: 'signature',
@@ -60,6 +120,20 @@ export const tiers: Record<TierId, TierDefinition> = {
     heroImageKey: 'spaceCounter',
     priceFrom: 'AED 24,000',
     timeline: '5–7 weeks',
+    features: {
+      menuSourcing: true,
+      menuPairings: true,
+      menuAllergenMatrix: true,
+      menuOrdering: true,
+      storyTimeline: true,
+      storyTeam: true,
+      visitTransport: true,
+      visitAccessibility: true,
+      visitRooms: true,
+      bookingFloorPlan: false,
+      menuShowcase: false,
+      scrollReveal: true,
+    },
   },
   immersive: {
     id: 'immersive',
@@ -78,6 +152,20 @@ export const tiers: Record<TierId, TierDefinition> = {
     heroImageKey: 'heroStory',
     priceFrom: 'AED 52,000',
     timeline: '9–12 weeks',
+    features: {
+      menuSourcing: true,
+      menuPairings: true,
+      menuAllergenMatrix: true,
+      menuOrdering: true,
+      storyTimeline: true,
+      storyTeam: true,
+      visitTransport: true,
+      visitAccessibility: true,
+      visitRooms: true,
+      bookingFloorPlan: true,
+      menuShowcase: true,
+      scrollReveal: true,
+    },
   },
 };
 
@@ -106,6 +194,7 @@ const essentialNav: readonly NavItem[] = [
 
 const signatureNav: readonly NavItem[] = [
   { key: 'menu', path: '/menu' },
+  { key: 'order', path: '/order' },
   { key: 'story', path: '/story' },
   { key: 'events', path: '/events' },
   { key: 'journal', path: '/journal' },
@@ -139,3 +228,8 @@ export const pitchRoutes = {
   compare: '/compare',
   bespoke: '/bespoke',
 } as const;
+
+/** Shorthand for the common `tiers[tier].features` read. */
+export function featuresFor(tier: TierId): TierFeatures {
+  return tiers[tier].features;
+}

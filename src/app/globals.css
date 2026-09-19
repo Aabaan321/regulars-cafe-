@@ -138,6 +138,122 @@
   --elev-4: 0 1px 0 0 rgb(255 245 230 / 0.08) inset, 0 28px 64px rgb(0 0 0 / 0.6);
 }
 
+/* ═══ Tier design languages ══════════════════════════════════════════════
+
+   Three tiers are three *products*, and a client clicking between them has
+   to see that immediately — otherwise the pitch is a price list with nothing
+   behind it. Before this block the shared pages rendered pixel-identically
+   across all three, which made the more expensive tiers look like the cheap
+   one with extra routes bolted on.
+
+   So each tier redefines the tokens the whole system already reads from.
+   Every page, every card, every heading changes without a single page
+   component knowing which tier it is rendering. `data-tier` is set once, on
+   the shell.
+
+   The differences are deliberately *structural* rather than decorative —
+   type scale, rhythm, radius, elevation, motion — because that is what
+   actually separates a competent small site from an expensive one. Colour is
+   held constant on purpose: it is the same café at every tier.               */
+
+/* ── Tier 1 · Essential — quiet, tight, honest ───────────────────────────
+   Restrained by design, not by neglect. Smaller display sizes, a compact
+   vertical rhythm, near-square corners and almost no shadow: the look of a
+   site that is fast and says what it needs to. It should read as *finished*,
+   never as a stripped-back version of the tiers above it.                   */
+[data-tier='essential'] {
+  --step-4: clamp(1.45rem, 1.2rem + 1.1vw, 2.25rem);
+  --step-5: clamp(1.6rem, 1.3rem + 1.35vw, 2.75rem);
+  --step-6: clamp(1.75rem, 1.35rem + 1.75vw, 3.25rem);
+  --step-7: clamp(1.9rem, 1.4rem + 2.2vw, 3.9rem);
+
+  --section-y: clamp(2.75rem, 2rem + 3.2vw, 5rem);
+  --content-max: 68rem;
+
+  --radius-sm: 0.25rem;
+  --radius-md: 0.3rem;
+  --radius-lg: 0.4rem;
+  --radius-xl: 0.5rem;
+
+  --elev-1: 0 1px 1px rgb(58 40 26 / 0.05);
+  --elev-2: 0 1px 2px rgb(58 40 26 / 0.07);
+  --elev-3: 0 2px 5px -2px rgb(58 40 26 / 0.09);
+  --elev-4: 0 4px 10px -4px rgb(58 40 26 / 0.12);
+
+  --tier-hero-min: 62svh;
+  --tier-card-lift: 0px;
+  --tier-rule-weight: 1px;
+}
+
+/* ── Tier 2 · Signature — editorial and warm ─────────────────────────────
+   Where the money starts showing. Bigger headlines, a generous rhythm, cards
+   that are genuinely cards and lift under the cursor, and section rules that
+   read as art direction rather than as dividers.                            */
+[data-tier='signature'] {
+  --step-5: clamp(1.95rem, 1.35rem + 2.7vw, 4.4rem);
+  --step-6: clamp(2.2rem, 1.25rem + 4.1vw, 5.75rem);
+  --step-7: clamp(2.5rem, 1.1rem + 6vw, 7.25rem);
+
+  --section-y: clamp(4rem, 2.4rem + 6.4vw, 9rem);
+  --content-max: 78rem;
+
+  --radius-lg: 1.25rem;
+  --radius-xl: 2rem;
+
+  --tier-hero-min: 78svh;
+  --tier-card-lift: -4px;
+  --tier-rule-weight: 2px;
+}
+
+/* ── Tier 3 · Immersive — cinematic ──────────────────────────────────────
+   Editorial scale pushed to poster scale: type that fills the viewport, air
+   between sections, and soft-cornered surfaces that sit on the photography
+   rather than boxing it in.                                                 */
+[data-tier='immersive'] {
+  --step-5: clamp(2.1rem, 1.35rem + 3.4vw, 5rem);
+  --step-6: clamp(2.4rem, 1.2rem + 5.2vw, 6.75rem);
+  --step-7: clamp(2.75rem, 0.9rem + 8vw, 8.5rem);
+
+  --section-y: clamp(4.5rem, 2.6rem + 7.6vw, 10.5rem);
+  --content-max: 82rem;
+  --wide-max: 104rem;
+
+  --radius-lg: 1.5rem;
+  --radius-xl: 2.5rem;
+
+  --tier-hero-min: 92svh;
+  --tier-card-lift: -6px;
+  --tier-rule-weight: 2px;
+}
+
+/* Tier 2 and 3 buy motion; Tier 1 does not pretend to have it. Cards lift,
+   images breathe, and anything marked `data-motion-only` is hidden outright
+   at Tier 1 rather than sitting there doing nothing. */
+[data-tier='essential'] [data-motion-only] {
+  display: none;
+}
+
+[data-tier='signature'] .card,
+[data-tier='immersive'] .card {
+  transition:
+    transform var(--dur-base) var(--ease-out-soft, ease),
+    box-shadow var(--dur-base) var(--ease-out-soft, ease);
+}
+
+[data-tier='signature'] .card:hover,
+[data-tier='immersive'] .card:hover {
+  transform: translateY(var(--tier-card-lift));
+  box-shadow: var(--elev-3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tier] .card,
+  [data-tier] .card:hover {
+    transition: none;
+    transform: none;
+  }
+}
+
 /* ═══ Base ═══════════════════════════════════════════════════════════════ */
 
 @layer base {

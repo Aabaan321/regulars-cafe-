@@ -29,7 +29,11 @@ export function TierShell({
   const bilingual = tiers[tier].bilingual;
 
   return (
-    <>
+    // `data-tier` is the whole tier design language in one attribute: the
+    // token overrides in globals.css hang off it, so every heading, card,
+    // rule and rhythm below changes without a single page component knowing
+    // which tier it is being rendered for.
+    <div data-tier={tier} className="contents">
       <JsonLd
         id="ld-site"
         data={[
@@ -52,6 +56,6 @@ export function TierShell({
       <TierSwitcher current={tier} />
       {/* Clears the sticky mobile bar so it never covers the footer. */}
       <div aria-hidden="true" className="h-14 sm:hidden" />
-    </>
+    </div>
   );
 }

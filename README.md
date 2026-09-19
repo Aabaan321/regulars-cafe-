@@ -97,6 +97,45 @@ forms show a designed message rather than a 500.
 Performance is short of the ≥95 target and LCP short of <2.0s; both are being
 worked. CLS is 0.000 across every page and SEO is 100 everywhere.
 
+### What separates the three tiers
+
+Before this, the shared pages (`/menu`, `/story`, `/visit`) rendered
+**pixel-identically** at every tier — 10,371px at Tier 2, 10,371px at Tier 3.
+A client clicking between tiers saw the same site three times, which is fatal
+for a sales asset whose whole job is answering "what does the extra money
+buy?"
+
+Two mechanisms fix that, and neither forks a page component.
+
+**A tier design language**, set by one `data-tier` attribute on the shell.
+Each tier redefines the tokens the whole system already reads — type scale,
+vertical rhythm, radius, elevation, motion — so every heading, card and rule
+changes without any page knowing which tier it is. Colour is held constant on
+purpose: it is the same café at every tier. Tier 1 is quiet and tight; Tier 2
+is editorial with cards that lift; Tier 3 is poster-scale.
+
+**A tier capability model** in `src/lib/config/navigation.ts`. Pages ask
+`features.menuSourcing` and render a section or do not. Adding depth to Tier 2
+is a boolean and a guard, not a fork.
+
+Measured on the shared pages, same content source, same components:
+
+| Page     | Essential              | Signature              | Immersive              |
+| -------- | ---------------------- | ---------------------- | ---------------------- |
+| `/menu`  | 10,341px · 1,696 words | 14,560px · 3,162 words | 17,268px · 3,310 words |
+| `/visit` | 3,789px · 552 words    | 6,606px · 1,115 words  | 6,840px · 1,115 words  |
+| `/story` | 5,952px · 982 words    | 7,627px · 1,194 words  | 8,380px · 1,194 words  |
+
+What Tier 2 adds to the shared pages: the lots on the brew bar with the FOB
+price paid against the commodity price that week, a full allergen grid as a
+real `<table>` with row/column scope, pickup ordering, four routes into Al
+Quoz, what each room in the building is good and bad for, and an
+accessibility list that marks what the café **does not** provide as plainly
+as what it does.
+
+What Tier 3 adds on top: a full-bleed editorial showcase of the signatures,
+and — on `/book` — the interactive floor plan.
+
 ### Tier 2 — Signature 🚧 in progress
 
 Built and verified: the availability engine, the atomic booking function, the
@@ -109,8 +148,17 @@ link opened, the booking cancelled, and the cancellation logged; an events
 enquiry submitted, routed, written (the row is invisible to the app's own
 database role, which is RLS doing its job), and the alert email logged.
 
-Not built yet: ordering and Stripe, loyalty, gift cards, the Tier 2/3 admin
-dashboard, the reminder cron, and waitlist auto-notify.
+**Pickup ordering** is built and verified end to end: basket, collection
+slots derived from trading hours, a real row in `orders` and `order_items`,
+and the alert email logged. The rule that shapes it is that **the cart is a
+claim, not a price** — every number the browser sends about money is thrown
+away and recomputed from the menu server-side. That is tested rather than
+asserted: a forged basket claiming 1 fil per item was charged the full 1800.
+VAT is _extracted_ from the inclusive menu price rather than added to it,
+which is what the café actually charges.
+
+Not built yet: Stripe (orders are pay-at-the-bar today), loyalty, gift cards,
+the Tier 2/3 admin dashboard, the reminder cron, and waitlist auto-notify.
 
 ### Tier 3 — Immersive 🚧 in progress
 
@@ -158,8 +206,17 @@ Verified in a real browser at desktop, phone, RTL and reduced-motion: no
 console errors, no hydration mismatch, all 72 frames fetched on the motion
 paths and none on the reduced-motion path.
 
-Not built yet: the custom cursor, View Transitions, the 3D menu showcase, the
-interactive floor plan, ambient audio, and a Lighthouse run for Tiers 2–3.
+**The interactive floor plan** is built. Pick your actual table off a plan of
+the room drawn from the real `plan_x`/`plan_y` columns on
+`restaurant_tables`, so moving a table in the admin moves it in the drawing.
+It is a radio group rather than a canvas of click targets — arrow keys move
+between tables, and every table's accessible name says everything the picture
+says ("Window 4, Window run, seats 2 to 4, step-free, free"), so the plan is
+usable with the screen off. Availability is never carried by colour alone: a
+taken table is hatched and its label struck through.
+
+Not built yet: the custom cursor, View Transitions, the 3D menu showcase,
+ambient audio, and a Lighthouse run for Tiers 2–3.
 
 #### Rebuilding the pour sequence
 

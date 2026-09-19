@@ -5,11 +5,13 @@ import { JsonLd } from '@/components/seo/json-ld';
 import { founder, storyIntro, storySections, team } from '@/lib/content/story';
 import { getImage, requireImage } from '@/lib/content/images';
 import { breadcrumbSchema } from '@/lib/seo/jsonld';
-import { tierHref, type TierId } from '@/lib/config/navigation';
+import { featuresFor, tierHref, type TierId } from '@/lib/config/navigation';
+import { TimelineSection } from '@/components/sections/story-depth';
 import type { Locale } from '@/lib/i18n/dictionaries';
 
 export function TierStoryPage({ tier, locale }: { tier: TierId; locale: Locale }) {
   const ar = locale === 'ar';
+  const features = featuresFor(tier);
   const founderImage = requireImage(founder.imageKey);
 
   return (
@@ -109,24 +111,28 @@ export function TierStoryPage({ tier, locale }: { tier: TierId; locale: Locale }
         );
       })}
 
-      <Section
-        eyebrow={ar ? 'من ستقابل' : 'Who you will meet'}
-        heading={ar ? 'الفريق خلف البار' : 'The people behind the bar'}
-      >
-        <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {team.map((person) => (
-            <li key={person.name} className="card p-5">
-              <h3 className="font-display text-ink text-lg font-semibold">{person.name}</h3>
-              <p className="text-accent text-2xs mt-0.5 font-bold tracking-wide uppercase">
-                {ar ? person.roleAr : person.role}
-              </p>
-              <p className="text-muted mt-3 text-xs leading-relaxed">
-                {ar ? person.noteAr : person.note}
-              </p>
-            </li>
-          ))}
-        </ul>
-      </Section>
+      {features.storyTimeline ? <TimelineSection locale={locale} /> : null}
+
+      {features.storyTeam ? (
+        <Section
+          eyebrow={ar ? 'من ستقابل' : 'Who you will meet'}
+          heading={ar ? 'الفريق خلف البار' : 'The people behind the bar'}
+        >
+          <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {team.map((person) => (
+              <li key={person.name} className="card p-5">
+                <h3 className="font-display text-ink text-lg font-semibold">{person.name}</h3>
+                <p className="text-accent text-2xs mt-0.5 font-bold tracking-wide uppercase">
+                  {ar ? person.roleAr : person.role}
+                </p>
+                <p className="text-muted mt-3 text-xs leading-relaxed">
+                  {ar ? person.noteAr : person.note}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </Section>
+      ) : null}
     </>
   );
 }

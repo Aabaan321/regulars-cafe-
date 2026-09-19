@@ -12,11 +12,28 @@ import { brand, directionsHref, telHref, whatsappHref } from '@/lib/config/brand
 import { getDictionary, type Locale } from '@/lib/i18n/dictionaries';
 import { breadcrumbSchema, faqSchema } from '@/lib/seo/jsonld';
 import { getOpenState, upcomingExceptions, weeklyHoursRows } from '@/lib/utils/hours';
-import { tierHref, type TierId } from '@/lib/config/navigation';
+import { featuresFor, tierHref, type TierId } from '@/lib/config/navigation';
+import {
+  AccessibilitySection,
+  RoomsSection,
+  TransportSection,
+} from '@/components/sections/visit-detail';
 
+/**
+ * Where we are, when we are open, and — from Tier 2 — everything that
+ * actually decides whether someone comes.
+ *
+ * Tier 1 answers the two questions a guest must have answered: address and
+ * hours. Tier 2 adds the three that stop people in practice — how to get
+ * here without knowing Al Quoz, which room to ask for, and whether a
+ * wheelchair, a guide dog or a phone call is going to work. That is roughly
+ * 1,400 more words of genuinely useful copy, and it is the difference
+ * between a listing and a venue page.
+ */
 export function TierVisitPage({ tier, locale }: { tier: TierId; locale: Locale }) {
   const dict = getDictionary(locale);
   const ar = locale === 'ar';
+  const features = featuresFor(tier);
   const open = getOpenState(undefined, locale);
   const rows = weeklyHoursRows(locale);
   const exceptions = upcomingExceptions();
@@ -152,6 +169,10 @@ export function TierVisitPage({ tier, locale }: { tier: TierId; locale: Locale }
           </div>
         </div>
       </div>
+
+      {features.visitTransport ? <TransportSection locale={locale} /> : null}
+      {features.visitRooms ? <RoomsSection locale={locale} /> : null}
+      {features.visitAccessibility ? <AccessibilitySection locale={locale} /> : null}
 
       <Section
         id="contact"

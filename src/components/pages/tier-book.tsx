@@ -8,7 +8,7 @@ import { breadcrumbSchema, faqSchema } from '@/lib/seo/jsonld';
 import { brand } from '@/lib/config/brand';
 import { bookableDates } from '@/lib/utils/booking-dates';
 import { getDictionary, type Locale } from '@/lib/i18n/dictionaries';
-import { tierHref, type TierId } from '@/lib/config/navigation';
+import { featuresFor, tierHref, type TierId } from '@/lib/config/navigation';
 import { isDatabaseConfigured } from '@/lib/db/client';
 import { NoDatabasePanel } from '@/components/ui/no-database-panel';
 
@@ -58,6 +58,7 @@ export function TierBookPage({ tier, locale }: { tier: TierId; locale: Locale })
             dates={dates}
             maxPartySize={brand.service.maxOnlinePartySize}
             privateHireHref={tierHref(tier, '/events#private-hire', locale)}
+            showFloorPlan={featuresFor(tier).bookingFloorPlan}
           />
         ) : (
           <NoDatabasePanel locale={locale} />

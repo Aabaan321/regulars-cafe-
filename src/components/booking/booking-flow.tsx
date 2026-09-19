@@ -8,6 +8,7 @@ import { brand } from '@/lib/config/brand';
 import { formatNumber, type Dictionary, type Locale } from '@/lib/i18n/dictionaries';
 import type { SlotReason, SlotView } from '@/lib/db/queries';
 import type { TierId } from '@/lib/config/navigation';
+import dynamic from 'next/dynamic';
 
 /**
  * The four-step reservation flow.
@@ -39,13 +40,15 @@ export interface BookingFlowProps {
   readonly dates: readonly { iso: string; weekday: string; day: string; month: string }[];
   readonly maxPartySize: number;
   readonly privateHireHref: string;
-  /** Tier 3 swaps in the interactive floor plan at the time step. */
-  readonly renderFloorPlan?: (args: {
-    slotIso: string;
-    partySize: number;
-    selectedTableId: string | null;
-    onSelect: (tableId: string | null) => void;
-  }) => React.ReactNode;
+  /**
+   * Tier 3 adds the interactive floor plan at the time step.
+   *
+   * A boolean rather than a render prop: this component is rendered from a
+   * server component, and a closure cannot cross that boundary — passing one
+   * fails at serialisation. The flow imports the plan itself, which also
+   * keeps it out of the bundle for the tiers that do not show it.
+   */
+  readonly showFloorPlan?: boolean;
 }
 
 interface AvailabilityState {
@@ -55,6 +58,15 @@ interface AvailabilityState {
   readonly error: string | null;
 }
 
+/**
+ * Tier 3 only, so it is fetched only when a Tier 3 page actually renders the
+ * flow — the SVG plan and its loader are dead weight on Tiers 1 and 2.
+ */
+const FloorPlanLoader = dynamic(
+  () => import('@/components/booking/floor-plan-loader').then((m) => m.FloorPlanLoader),
+  { ssr: false },
+);
+
 export function BookingFlow({
   dict,
   locale,
@@ -62,7 +74,7 @@ export function BookingFlow({
   dates,
   maxPartySize,
   privateHireHref,
-  renderFloorPlan,
+  showFloorPlan = false,
 }: BookingFlowProps) {
   // Restored from the URL during the first render rather than in an effect:
   // reading it afterwards and calling setState renders the whole flow twice
@@ -434,7 +446,7 @@ export function BookingFlow({
                         onSelect={() => {
                           setSlot(s);
                           setTableId(null);
-                          if (!renderFloorPlan) setStep(3);
+                          if (!showFloorPlan) setStep(3);
                         }}
                       />
                     ))}
@@ -445,14 +457,15 @@ export function BookingFlow({
           )}
 
           {/* Tier 3's interactive floor plan lives here. */}
-          {renderFloorPlan && slot ? (
+          {showFloorPlan && slot ? (
             <div className="mt-8">
-              {renderFloorPlan({
-                slotIso: slot.at,
-                partySize: partySize ?? 2,
-                selectedTableId: tableId,
-                onSelect: setTableId,
-              })}
+              <FloorPlanLoader
+                slotIso={slot.at}
+                partySize={partySize ?? 2}
+                selectedTableId={tableId}
+                onSelect={setTableId}
+                locale={locale}
+              />
               <button type="button" className="btn mt-6" onClick={() => setStep(3)}>
                 {dict.common.continue}
               </button>
