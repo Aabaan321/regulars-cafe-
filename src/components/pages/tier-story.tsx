@@ -49,7 +49,9 @@ export function TierStoryPage({ tier, locale }: { tier: TierId; locale: Locale }
                 className="size-14 rounded-full object-cover"
               />
               <span className="text-start text-xs">
-                <span className="text-ink block font-bold">{ar ? founder.nameAr : founder.name}</span>
+                <span className="text-ink block font-bold">
+                  {ar ? founder.nameAr : founder.name}
+                </span>
                 <span className="text-faint">{ar ? founder.roleAr : founder.role}</span>
               </span>
             </figcaption>
@@ -115,7 +117,7 @@ export function TierStoryPage({ tier, locale }: { tier: TierId; locale: Locale }
           {team.map((person) => (
             <li key={person.name} className="card p-5">
               <h3 className="font-display text-ink text-lg font-semibold">{person.name}</h3>
-              <p className="text-accent mt-0.5 text-2xs font-bold tracking-wide uppercase">
+              <p className="text-accent text-2xs mt-0.5 font-bold tracking-wide uppercase">
                 {ar ? person.roleAr : person.role}
               </p>
               <p className="text-muted mt-3 text-xs leading-relaxed">

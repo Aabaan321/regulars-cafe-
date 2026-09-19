@@ -60,7 +60,9 @@ export function WaitlistForm({
           {(p) => <input {...p} type="text" required autoComplete="name" className="field-input" />}
         </Field>
         <Field label={dict.forms.email} name="email" required error={state?.fieldErrors?.email}>
-          {(p) => <input {...p} type="email" required autoComplete="email" className="field-input" />}
+          {(p) => (
+            <input {...p} type="email" required autoComplete="email" className="field-input" />
+          )}
         </Field>
       </div>
 
@@ -68,7 +70,12 @@ export function WaitlistForm({
         <Field label={dict.forms.phone} name="phone" required error={state?.fieldErrors?.phone}>
           {(p) => <input {...p} type="tel" required autoComplete="tel" className="field-input" />}
         </Field>
-        <Field label={dict.booking.stepParty} name="partySize" required error={state?.fieldErrors?.partySize}>
+        <Field
+          label={dict.booking.stepParty}
+          name="partySize"
+          required
+          error={state?.fieldErrors?.partySize}
+        >
           {(p) => (
             <select {...p} defaultValue="2" className="field-input">
               {Array.from({ length: maxPartySize }, (_, i) => i + 1).map((n) => (
@@ -95,10 +102,33 @@ export function WaitlistForm({
 
       <div className="grid gap-5 sm:grid-cols-2">
         <Field label={locale === 'ar' ? 'من' : 'Earliest'} name="windowStart" required>
-          {(p) => <input {...p} type="time" required defaultValue="11:00" step={900} className="field-input" />}
+          {(p) => (
+            <input
+              {...p}
+              type="time"
+              required
+              defaultValue="11:00"
+              step={900}
+              className="field-input"
+            />
+          )}
         </Field>
-        <Field label={locale === 'ar' ? 'إلى' : 'Latest'} name="windowEnd" required error={state?.fieldErrors?.windowEnd}>
-          {(p) => <input {...p} type="time" required defaultValue="14:00" step={900} className="field-input" />}
+        <Field
+          label={locale === 'ar' ? 'إلى' : 'Latest'}
+          name="windowEnd"
+          required
+          error={state?.fieldErrors?.windowEnd}
+        >
+          {(p) => (
+            <input
+              {...p}
+              type="time"
+              required
+              defaultValue="14:00"
+              step={900}
+              className="field-input"
+            />
+          )}
         </Field>
       </div>
 

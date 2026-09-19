@@ -223,7 +223,10 @@ export function BookingFlow({
 
   return (
     <div className="mx-auto w-full max-w-[44rem]">
-      <ol className="mb-8 flex items-center gap-1.5" aria-label={`${dict.booking.step} ${step + 1}`}>
+      <ol
+        className="mb-8 flex items-center gap-1.5"
+        aria-label={`${dict.booking.step} ${step + 1}`}
+      >
         {STEP_KEYS.map((key, index) => {
           const state = index < step ? 'done' : index === step ? 'current' : 'todo';
           return (
@@ -282,7 +285,7 @@ export function BookingFlow({
             ))}
           </div>
 
-          <p className="text-faint mt-5 text-2xs">
+          <p className="text-faint text-2xs mt-5">
             <a href={privateHireHref} className="text-accent font-semibold underline">
               {locale === 'ar'
                 ? `لتسعة أشخاص فأكثر — الحجز الخاص`
@@ -331,7 +334,9 @@ export function BookingFlow({
                   <span className="text-lg font-bold tabular-nums">{d.day}</span>
                   <span className="text-2xs">{d.month}</span>
                   {full ? (
-                    <span className="text-2xs mt-1 font-bold">{dict.booking.reasons.fully_booked}</span>
+                    <span className="text-2xs mt-1 font-bold">
+                      {dict.booking.reasons.fully_booked}
+                    </span>
                   ) : null}
                 </button>
               );
@@ -377,7 +382,11 @@ export function BookingFlow({
                 {dict.booking.noSlotsHint}
               </p>
               <div className="mt-5 flex flex-wrap justify-center gap-2">
-                <button type="button" className="btn btn-secondary btn-sm" onClick={() => setStep(1)}>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => setStep(1)}
+                >
                   {dict.common.change}
                 </button>
                 <a href="#waitlist" className="btn btn-sm">
@@ -454,7 +463,9 @@ export function BookingFlow({
                 required
                 error={result && !result.ok ? result.fieldErrors?.name : undefined}
               >
-                {(p) => <input {...p} type="text" required autoComplete="name" className="field-input" />}
+                {(p) => (
+                  <input {...p} type="text" required autoComplete="name" className="field-input" />
+                )}
               </Field>
               <Field
                 label={dict.forms.email}
@@ -463,7 +474,14 @@ export function BookingFlow({
                 error={result && !result.ok ? result.fieldErrors?.email : undefined}
               >
                 {(p) => (
-                  <input {...p} type="email" required inputMode="email" autoComplete="email" className="field-input" />
+                  <input
+                    {...p}
+                    type="email"
+                    required
+                    inputMode="email"
+                    autoComplete="email"
+                    className="field-input"
+                  />
                 )}
               </Field>
             </div>
@@ -487,16 +505,26 @@ export function BookingFlow({
                   />
                 )}
               </Field>
-              <Field label={dict.booking.occasion} name="occasion" optionalLabel={dict.common.optional}>
+              <Field
+                label={dict.booking.occasion}
+                name="occasion"
+                optionalLabel={dict.common.optional}
+              >
                 {(p) => (
                   <select {...p} defaultValue="none" className="field-input">
                     <option value="none">—</option>
                     <option value="birthday">{locale === 'ar' ? 'عيد ميلاد' : 'Birthday'}</option>
-                    <option value="anniversary">{locale === 'ar' ? 'ذكرى سنوية' : 'Anniversary'}</option>
+                    <option value="anniversary">
+                      {locale === 'ar' ? 'ذكرى سنوية' : 'Anniversary'}
+                    </option>
                     <option value="business">{locale === 'ar' ? 'اجتماع عمل' : 'Business'}</option>
                     <option value="date">{locale === 'ar' ? 'موعد' : 'A date'}</option>
-                    <option value="celebration">{locale === 'ar' ? 'احتفال' : 'Celebration'}</option>
-                    <option value="first_visit">{locale === 'ar' ? 'أول زيارة' : 'First visit'}</option>
+                    <option value="celebration">
+                      {locale === 'ar' ? 'احتفال' : 'Celebration'}
+                    </option>
+                    <option value="first_visit">
+                      {locale === 'ar' ? 'أول زيارة' : 'First visit'}
+                    </option>
                   </select>
                 )}
               </Field>
@@ -512,7 +540,11 @@ export function BookingFlow({
             </Field>
 
             <div className="grid gap-5 sm:grid-cols-2">
-              <Field label={dict.booking.highChairs} name="highChairs" optionalLabel={dict.common.optional}>
+              <Field
+                label={dict.booking.highChairs}
+                name="highChairs"
+                optionalLabel={dict.common.optional}
+              >
                 {(p) => (
                   <select {...p} defaultValue="0" className="field-input">
                     {[0, 1, 2, 3].map((n) => (
@@ -538,7 +570,12 @@ export function BookingFlow({
             </label>
 
             <div className="flex flex-wrap items-center gap-3">
-              <button type="submit" className="btn btn-lg" disabled={pending} data-loading={pending}>
+              <button
+                type="submit"
+                className="btn btn-lg"
+                disabled={pending}
+                data-loading={pending}
+              >
                 <span>{pending ? dict.forms.sending : dict.booking.confirmBooking}</span>
               </button>
               <button type="button" className="btn btn-ghost" onClick={() => setStep(2)}>
@@ -552,7 +589,7 @@ export function BookingFlow({
       {/* ── Step 4: confirmation ───────────────────────────────────────── */}
       {step === 4 && result?.ok ? (
         <section aria-labelledby="step-heading">
-          <div className="border-[color-mix(in_oklab,var(--c-success)_40%,transparent)] bg-[color-mix(in_oklab,var(--c-success)_10%,transparent)] rounded-[var(--radius-lg)] border p-6">
+          <div className="rounded-[var(--radius-lg)] border border-[color-mix(in_oklab,var(--c-success)_40%,transparent)] bg-[color-mix(in_oklab,var(--c-success)_10%,transparent)] p-6">
             <h2 id="step-heading" ref={headingRef} tabIndex={-1} className="display-3 outline-none">
               {dict.booking.confirmedTitle}
             </h2>
@@ -587,7 +624,7 @@ export function BookingFlow({
             </div>
           </div>
 
-          <p className="text-faint mt-6 text-2xs leading-relaxed">
+          <p className="text-faint text-2xs mt-6 leading-relaxed">
             {locale === 'ar'
               ? 'نحتفظ بالطاولة ١٥ دقيقة. إن تأخرت، راسلنا على واتساب وسنبقيها لك.'
               : 'We hold the table for 15 minutes. Running late? WhatsApp us and we will keep it.'}
@@ -677,7 +714,9 @@ function Detail({ label, value, mono }: { label: string; value: string; mono?: b
   return (
     <div>
       <dt className="text-faint text-2xs font-bold tracking-wider uppercase">{label}</dt>
-      <dd className={`text-ink mt-0.5 text-xs font-semibold ${mono ? 'font-mono tracking-wider' : ''}`}>
+      <dd
+        className={`text-ink mt-0.5 text-xs font-semibold ${mono ? 'font-mono tracking-wider' : ''}`}
+      >
         {value}
       </dd>
     </div>

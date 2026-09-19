@@ -40,9 +40,7 @@ export function TierBookPage({ tier, locale }: { tier: TierId; locale: Locale })
       />
 
       <div className="container-page pt-[calc(var(--header-h)+var(--space-xl))] pb-[var(--space-xl)]">
-        <p className="eyebrow mb-3">
-          {ar ? 'الحجز' : 'Reservations'}
-        </p>
+        <p className="eyebrow mb-3">{ar ? 'الحجز' : 'Reservations'}</p>
         <h1 className="display-1 max-w-[16ch]">{dict.booking.title}</h1>
         <p className="lede measure mt-5">
           {ar
@@ -79,14 +77,21 @@ export function TierBookPage({ tier, locale }: { tier: TierId; locale: Locale })
       >
         <div className="max-w-[40rem]">
           {isDatabaseConfigured() ? (
-            <WaitlistForm dict={dict} locale={locale} maxPartySize={brand.service.maxOnlinePartySize} />
+            <WaitlistForm
+              dict={dict}
+              locale={locale}
+              maxPartySize={brand.service.maxOnlinePartySize}
+            />
           ) : (
             <NoDatabasePanel locale={locale} />
           )}
         </div>
       </Section>
 
-      <Section eyebrow={ar ? 'أسئلة شائعة' : 'Before you book'} heading={ar ? 'أسئلة متكررة' : 'Questions about booking'}>
+      <Section
+        eyebrow={ar ? 'أسئلة شائعة' : 'Before you book'}
+        heading={ar ? 'أسئلة متكررة' : 'Questions about booking'}
+      >
         <FaqAccordion faqs={faqs} locale={locale} />
       </Section>
     </>

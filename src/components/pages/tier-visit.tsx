@@ -130,7 +130,10 @@ export function TierVisitPage({ tier, locale }: { tier: TierId; locale: Locale }
                   <h3 className="eyebrow mb-3">{ar ? 'مواعيد العطلات' : 'Holiday hours'}</h3>
                   <ul className="flex flex-col gap-2">
                     {exceptions.map((exception) => (
-                      <li key={exception.date} className="flex items-baseline justify-between gap-3 text-xs">
+                      <li
+                        key={exception.date}
+                        className="flex items-baseline justify-between gap-3 text-xs"
+                      >
                         <span className="text-muted">
                           <span className="text-ink block font-semibold">{exception.label}</span>
                           <span className="text-faint text-2xs tabular-nums">{exception.date}</span>
@@ -161,7 +164,11 @@ export function TierVisitPage({ tier, locale }: { tier: TierId; locale: Locale }
         </div>
       </Section>
 
-      <Section id="faq" eyebrow={ar ? 'جيد أن تعرف' : 'Good to know'} heading={ar ? 'أسئلة متكررة' : 'Questions we get asked'}>
+      <Section
+        id="faq"
+        eyebrow={ar ? 'جيد أن تعرف' : 'Good to know'}
+        heading={ar ? 'أسئلة متكررة' : 'Questions we get asked'}
+      >
         <FaqAccordion faqs={faqs} locale={locale} />
       </Section>
     </>

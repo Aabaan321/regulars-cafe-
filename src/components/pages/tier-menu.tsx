@@ -28,20 +28,18 @@ export async function TierMenuPage({ tier, locale }: { tier: TierId; locale: Loc
         name: category.name,
         description: category.description,
         serviceNote: category.serviceNote,
-        items: category.items.map(
-          (item): MenuItemView => ({
-            id: item.id,
-            name: item.name,
-            description: item.description,
-            priceFils: item.priceFils,
-            dietary: item.dietary,
-            allergens: item.allergens,
-            badges: item.badges,
-            available: item.available,
-            unavailableReason: item.unavailableReason,
-            image: item.image,
-          }),
-        ),
+        items: category.items.map((item): MenuItemView => ({
+          id: item.id,
+          name: item.name,
+          description: item.description,
+          priceFils: item.priceFils,
+          dietary: item.dietary,
+          allergens: item.allergens,
+          badges: item.badges,
+          available: item.available,
+          unavailableReason: item.unavailableReason,
+          image: item.image,
+        })),
       }))
     : menuCategories
         .slice()

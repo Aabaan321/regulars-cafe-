@@ -10,13 +10,9 @@ import {
   waitlistJoinedEmail,
 } from '@/lib/email/templates';
 import { buildIcs } from '@/lib/email/ics';
-import { hashToken, issueToken, parseToken } from '@/lib/utils/tokens';
+import { hashToken, issueOpaqueToken, issueToken, parseToken } from '@/lib/utils/tokens';
 import { looksAutomated, rateLimit } from '@/lib/utils/rate-limit';
-import {
-  createReservationSchema,
-  toFieldErrors,
-  waitlistSchema,
-} from '@/lib/validation/schemas';
+import { createReservationSchema, toFieldErrors, waitlistSchema } from '@/lib/validation/schemas';
 import { getDictionary, type Locale } from '@/lib/i18n/dictionaries';
 
 /**
@@ -90,18 +86,14 @@ function mapDatabaseError(error: unknown, locale: Locale): BookingFailure {
     return {
       ok: false,
       code: 'blackout',
-      message:
-        locale === 'ar' ? 'نحن مغلقون في ذلك التاريخ.' : 'We are closed on that date.',
+      message: locale === 'ar' ? 'نحن مغلقون في ذلك التاريخ.' : 'We are closed on that date.',
     };
   }
   if (message.includes('closed')) {
     return {
       ok: false,
       code: 'closed',
-      message:
-        locale === 'ar'
-          ? 'لا نقدّم الخدمة في ذلك الوقت.'
-          : 'We do not serve at that time.',
+      message: locale === 'ar' ? 'لا نقدّم الخدمة في ذلك الوقت.' : 'We do not serve at that time.',
     };
   }
 
@@ -155,9 +147,11 @@ export async function createBooking(raw: unknown): Promise<BookingResult> {
     return { ok: false, code: 'rate_limited', message: dict.forms.rateLimited };
   }
 
-  // The token is generated before the insert so its hash can go in the same
-  // row; the plaintext only ever leaves in the guest's email.
-  const token = issueToken('manage-booking', `${data.email}-${data.slot}`);
+  // Generated before the insert so its hash goes into the same row; the
+  // plaintext only ever leaves in the guest's email. Opaque on purpose — a
+  // manage URL should not carry the guest's address in their history or in
+  // any referrer header.
+  const token = issueOpaqueToken('manage-booking');
 
   try {
     const rows = await asService(
@@ -222,7 +216,11 @@ export async function createBooking(raw: unknown): Promise<BookingResult> {
       tier: data.sourceTier,
       meta: { reference: row.reference },
       attachments: [
-        { filename: `regulars-${row.reference}.ics`, content: ics, contentType: 'text/calendar; charset=utf-8; method=REQUEST' },
+        {
+          filename: `regulars-${row.reference}.ics`,
+          content: ics,
+          contentType: 'text/calendar; charset=utf-8; method=REQUEST',
+        },
       ],
     });
 
@@ -370,7 +368,9 @@ export async function rescheduleBooking(
 
   try {
     const rows = await asService(
-      async (tx) => tx<{ id: string; reference: string; starts_at: Date; party_size: number; email: string }[]>`
+      async (tx) => tx<
+        { id: string; reference: string; starts_at: Date; party_size: number; email: string }[]
+      >`
         with target as (
           select id from reservations where manage_token_hash = ${parsed.hash} limit 1
         )
@@ -444,7 +444,7 @@ export async function joinWaitlist(
   });
   if (!limit.allowed) return { ok: false, message: dict.forms.rateLimited };
 
-  const token = issueToken('waitlist-offer', `${data.email}-${data.date}`);
+  const token = issueOpaqueToken('waitlist-offer');
 
   try {
     await asService(
