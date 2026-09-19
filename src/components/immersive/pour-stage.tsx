@@ -239,11 +239,13 @@ function PourCanvas({ variant }: { variant: 'wide' | 'tall' }) {
  *
  * So the darkening is shaped to the text column, and the numbers were
  * measured rather than eyeballed: the brightest 99.5th-percentile luminance
- * anywhere under the column is 0.31 on the wide cut and 0.23 on the tall one,
- * which puts the minimum scrim that clears 4.5:1 against #FFFBF4 at 0.46 and
- * 0.40 respectively. The values below sit a comfortable margin above those
- * and no higher — every extra point of black is a point of photography
- * thrown away, and this footage is dark to begin with.
+ * anywhere under the column is 0.27 on the wide cut and 0.25 on the tall one,
+ * which puts the minimum scrim that clears 4.5:1 against #FFFBF4 at 0.36 and
+ * 0.30 respectively. The values below hold a ≥5:1 margin over those and no
+ * more — every extra point of black is a point of photography thrown away,
+ * and this footage is dark to begin with. Re-measure them if the clip is ever
+ * swapped; the first cut of this sequence needed a heavier scrim than this
+ * one does.
  *
  * The shape differs by cut because the problem does. On a wide viewport the
  * column occupies the left half, so the scrim falls away to almost nothing
@@ -275,10 +277,10 @@ function Scrim({ dir, variant }: { dir: 'ltr' | 'rtl'; variant: 'wide' | 'tall' 
 
   const column =
     variant === 'tall'
-      ? 'linear-gradient(to bottom, rgba(9,6,4,0.78) 0%, rgba(9,6,4,0.54) 24%, ' +
-        'rgba(9,6,4,0.52) 66%, rgba(9,6,4,0.84) 100%)'
-      : `linear-gradient(to ${side}, rgba(9,6,4,0.76) 0%, rgba(9,6,4,0.68) 30%, ` +
-        `rgba(9,6,4,0.58) 48%, rgba(9,6,4,0.30) 72%, rgba(9,6,4,0.06) 100%)`;
+      ? 'linear-gradient(to bottom, rgba(9,6,4,0.70) 0%, rgba(9,6,4,0.44) 24%, ' +
+        'rgba(9,6,4,0.42) 66%, rgba(9,6,4,0.78) 100%)'
+      : `linear-gradient(to ${side}, rgba(9,6,4,0.68) 0%, rgba(9,6,4,0.60) 30%, ` +
+        `rgba(9,6,4,0.48) 50%, rgba(9,6,4,0.22) 74%, rgba(9,6,4,0.04) 100%)`;
 
   return (
     <>
@@ -288,7 +290,7 @@ function Scrim({ dir, variant }: { dir: 'ltr' | 'rtl'; variant: 'wide' | 'tall' 
           className="absolute inset-0"
           style={{
             backgroundImage:
-              'linear-gradient(to bottom, rgba(9,6,4,0.40) 0%, rgba(9,6,4,0.00) 26%, rgba(9,6,4,0.04) 70%, rgba(9,6,4,0.56) 100%)',
+              'linear-gradient(to bottom, rgba(9,6,4,0.34) 0%, rgba(9,6,4,0.00) 26%, rgba(9,6,4,0.02) 70%, rgba(9,6,4,0.50) 100%)',
           }}
         />
       ) : null}

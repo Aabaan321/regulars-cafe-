@@ -33,32 +33,35 @@ const run = promisify(execFile);
 /* ── The cut ───────────────────────────────────────────────────────────── */
 
 const SOURCE = {
-  url: 'https://assets.mixkit.co/videos/236/236-1080.mp4',
-  title: 'Filling a white cup of coffee',
-  credit: 'Mixkit — https://mixkit.co/free-stock-video/filling-a-white-cup-of-coffee-236/',
+  url: 'https://assets.mixkit.co/videos/43941/43941-1080.mp4',
+  title: 'Pouring coffee in a cup',
+  credit: 'Mixkit — https://mixkit.co/free-stock-video/pouring-coffee-in-a-cup-43941/',
   licence: 'Mixkit Free Stock Video License (commercial use, no attribution required)',
 } as const;
 
 /**
- * Where the interesting 17.6 seconds are.
+ * The whole arc, which is the whole clip.
  *
- * The clip runs 20s. The first second is the stream finding the cup and the
- * last one is a held still; trimming both means every frame we ship is a frame
- * where something is actually changing, which is the whole budget argument for
- * a sequence this size.
+ * This shot was chosen over a prettier macro precisely because it *goes
+ * somewhere*: an almost-empty white cup at 0.2s, a third full at 5s, full with
+ * settled crema at 15s. The first cut of this sequence used a beautiful
+ * side-on macro whose level barely moved, and scrubbing it felt like nothing
+ * was happening — the frames churned but the picture never changed. A
+ * scroll-scrub lives or dies on legible, monotonic transformation, not on how
+ * good any single frame looks.
  */
-const START_SECONDS = 1.2;
-const END_SECONDS = 18.8;
+const START_SECONDS = 0.2;
+const END_SECONDS = 15.2;
 
 /**
- * 72 frames.
+ * 80 frames.
  *
  * The pour owns roughly two and a half viewport heights of scroll, so this is
  * about one frame per 30px of wheel travel — past the point where the eye
  * reads it as steps rather than motion. Doubling it would double the bytes to
  * buy nothing.
  */
-const FRAME_COUNT = 72;
+const FRAME_COUNT = 80;
 
 /**
  * Two crops, and a device only ever downloads one of them.
@@ -69,16 +72,30 @@ const FRAME_COUNT = 72;
  * a third fewer bytes.
  */
 const VARIANTS = [
-  { id: 'wide', width: 1280, height: 720, crop: null, quality: 70 },
+  { id: 'wide', width: 1280, height: 720, crop: null, quality: 62 },
   {
     id: 'tall',
     width: 720,
     height: 960,
-    // 810×1080 out of the 1920×1080 master, centred on the cup.
-    crop: { left: 555, top: 0, width: 810, height: 1080 },
-    quality: 68,
+    // 810×1080 out of the 1920×1080 master, centred on the cup. Tight enough
+    // that the styling props at the edge of the flat-lay fall outside it.
+    crop: { left: 595, top: 0, width: 810, height: 1080 },
+    quality: 64,
   },
 ] as const;
+
+/**
+ * Where the lens is focused.
+ *
+ * The master is sharp corner to corner, which is not how anyone would light
+ * and shoot this cup, and the bean field in the background is pure
+ * high-frequency detail — the single most expensive thing in the frame to
+ * encode, for the least reason to look at. Falling off to a soft edge is what
+ * a fast lens would have done anyway; it pulls the eye to the cup and it takes
+ * ~28% off every frame (29KB → 21KB at the same quality). Doing it here rather
+ * than in CSS means the bytes are saved on the wire, not just on the screen.
+ */
+const FOCUS = { blur: 16, centreX: '50%', centreY: '47%', radius: '62%', holdTo: '50%' } as const;
 
 /* ── Paths ─────────────────────────────────────────────────────────────── */
 
@@ -152,6 +169,35 @@ async function extractFrames(): Promise<void> {
   }
 }
 
+/**
+ * A soft radial mask, as an SVG whose alpha runs 1 → 0 from the centre out.
+ * Composited with `dest-in` it turns the sharp frame into "sharp in the
+ * middle, transparent at the edges", which then sits over the blurred copy.
+ */
+function focusMask(width: number, height: number): Buffer {
+  return Buffer.from(
+    `<svg width="${width}" height="${height}">` +
+      `<defs><radialGradient id="f" cx="${FOCUS.centreX}" cy="${FOCUS.centreY}" r="${FOCUS.radius}">` +
+      `<stop offset="${FOCUS.holdTo}" stop-color="#fff" stop-opacity="1"/>` +
+      `<stop offset="100%" stop-color="#fff" stop-opacity="0"/>` +
+      `</radialGradient></defs>` +
+      `<rect width="100%" height="100%" fill="url(#f)"/></svg>`,
+  );
+}
+
+/** Sharp centre over a blurred copy of itself, feathered by `focusMask`. */
+async function withFocusFalloff(crisp: Buffer, width: number, height: number): Promise<Buffer> {
+  const soft = await sharp(crisp).blur(FOCUS.blur).toBuffer();
+  const keyed = await sharp(crisp)
+    .ensureAlpha()
+    .composite([{ input: focusMask(width, height), blend: 'dest-in' }])
+    .png()
+    .toBuffer();
+  return sharp(soft)
+    .composite([{ input: keyed, blend: 'over' }])
+    .toBuffer();
+}
+
 async function encodeVariants(): Promise<Record<string, number>> {
   const bytes: Record<string, number> = {};
 
@@ -167,9 +213,13 @@ async function encodeVariants(): Promise<Record<string, number>> {
       let pipeline = sharp(source);
       if (variant.crop) pipeline = pipeline.extract(variant.crop);
 
-      const file = path.join(dir, `${pad(i)}.webp`);
-      await pipeline
+      const crisp = await pipeline
         .resize(variant.width, variant.height, { fit: 'cover' })
+        .toBuffer();
+      const focused = await withFocusFalloff(crisp, variant.width, variant.height);
+
+      const file = path.join(dir, `${pad(i)}.webp`);
+      await sharp(focused)
         .webp({ quality: variant.quality, effort: 6, smartSubsample: true })
         .toFile(file);
 
@@ -198,17 +248,22 @@ async function buildPoster(): Promise<{ blurDataURL: string; bytes: number }> {
   const first = path.join(RAW_DIR, '001.png');
   let bytes = 0;
 
-  await sharp(first)
-    .resize(1600, 900, { fit: 'cover' })
-    .webp({ quality: 78, effort: 6 })
-    .toFile(path.join(OUT_DIR, 'poster-wide.webp'));
+  // Same focus falloff as the frames — the canvas cross-fades over this, and a
+  // poster with a different depth of field would make the handover visible.
+  const wide = await withFocusFalloff(
+    await sharp(first).resize(1600, 900, { fit: 'cover' }).toBuffer(),
+    1600,
+    900,
+  );
+  await sharp(wide).webp({ quality: 74, effort: 6 }).toFile(path.join(OUT_DIR, 'poster-wide.webp'));
   bytes += (await stat(path.join(OUT_DIR, 'poster-wide.webp'))).size;
 
-  await sharp(first)
-    .extract(VARIANTS[1].crop)
-    .resize(900, 1200, { fit: 'cover' })
-    .webp({ quality: 76, effort: 6 })
-    .toFile(path.join(OUT_DIR, 'poster-tall.webp'));
+  const tall = await withFocusFalloff(
+    await sharp(first).extract(VARIANTS[1].crop).resize(900, 1200, { fit: 'cover' }).toBuffer(),
+    900,
+    1200,
+  );
+  await sharp(tall).webp({ quality: 72, effort: 6 }).toFile(path.join(OUT_DIR, 'poster-tall.webp'));
   bytes += (await stat(path.join(OUT_DIR, 'poster-tall.webp'))).size;
 
   const tiny = await sharp(first).resize(20).webp({ quality: 55 }).toBuffer();
