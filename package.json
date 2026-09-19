@@ -2,7 +2,7 @@
   "name": "aureon-cafe-tiers",
   "version": "1.0.0",
   "private": true,
-  "description": "Three-tier caf\u00e9 website demo built as an agency sales asset by Aureon Studio.",
+  "description": "Three-tier café website demo built as an agency sales asset by Aureon Studio.",
   "engines": {
     "node": ">=20.9.0"
   },
@@ -22,7 +22,8 @@
     "setup": "npm run db:migrate && npm run seed",
     "cron:reminders": "tsx scripts/send-reminders.ts",
     "verify": "npm run typecheck && npm run lint && npm run build",
-    "images:fetch": "tsx scripts/fetch-images.ts"
+    "images:fetch": "tsx scripts/fetch-images.ts",
+    "pour:frames": "tsx scripts/build-pour-frames.ts"
   },
   "dependencies": {
     "@date-fns/tz": "^1.5.0",

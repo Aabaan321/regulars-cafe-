@@ -3,13 +3,24 @@
 import { revalidatePath } from 'next/cache';
 import { asService, isDatabaseConfigured } from '@/lib/db/client';
 import { sendEmail, sendEmailDetached } from '@/lib/email/send';
-import { enquiryAckEmail, enquiryAlertEmail, subscribeConfirmEmail } from '@/lib/email/templates';
+import {
+  enquiryAckEmail,
+  enquiryAlertEmail,
+  eventEnquiryAlertEmail,
+  subscribeConfirmEmail,
+} from '@/lib/email/templates';
 import { brand, siteUrl } from '@/lib/config/brand';
 import { issueToken } from '@/lib/utils/tokens';
 import { looksAutomated, rateLimit } from '@/lib/utils/rate-limit';
-import { enquirySchema, subscribeSchema, toFieldErrors } from '@/lib/validation/schemas';
+import {
+  enquirySchema,
+  eventEnquirySchema,
+  subscribeSchema,
+  toFieldErrors,
+} from '@/lib/validation/schemas';
 import { getDictionary, type Locale } from '@/lib/i18n/dictionaries';
 import type { FormState } from '@/lib/actions/form-state';
+import { routeEventEnquiry } from '@/lib/reservations/event-routing';
 
 /**
  * Server actions for the public forms.
@@ -263,4 +274,115 @@ export async function subscribeToNewsletter(
 
   revalidatePath('/');
   return { status: 'success', message: dict.newsletter.pendingBody };
+}
+
+/* ── Events & private hire ────────────────────────────────────────────────── */
+
+export async function submitEventEnquiry(
+  _previous: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const locale = (formData.get('locale') as Locale) ?? 'en';
+  const dict = getDictionary(locale);
+  const echoed = values(formData, ['name', 'email', 'phone', 'company', 'eventDate', 'headcount', 'message']);
+
+  if (
+    looksAutomated({
+      honeypot: formData.get('website') as string | null,
+      renderedAt: Number(formData.get('renderedAt')) || null,
+    })
+  ) {
+    return { status: 'success', message: dict.forms.successBody };
+  }
+
+  if (!isDatabaseConfigured()) return noDatabaseState(echoed);
+
+  const parsed = eventEnquirySchema.safeParse({
+    name: formData.get('name'),
+    email: formData.get('email'),
+    phone: formData.get('phone'),
+    company: formData.get('company') ?? '',
+    eventDate: formData.get('eventDate'),
+    headcount: formData.get('headcount'),
+    budgetFils: formData.get('budgetFils') || undefined,
+    eventType: formData.get('eventType') ?? 'private_hire',
+    message: formData.get('message'),
+    locale,
+    website: formData.get('website') ?? '',
+    renderedAt: formData.get('renderedAt') ?? undefined,
+  });
+
+  if (!parsed.success) {
+    return {
+      status: 'error',
+      message: dict.forms.fixErrors,
+      fieldErrors: toFieldErrors(parsed.error),
+      values: echoed,
+    };
+  }
+
+  const limit = await rateLimit({
+    bucket: 'event-enquiry',
+    limit: 4,
+    windowSeconds: 3600,
+    extraIdentity: parsed.data.email,
+  });
+  if (!limit.allowed) {
+    return { status: 'error', message: dict.forms.rateLimited, values: echoed };
+  }
+
+  const data = parsed.data;
+  const routing = routeEventEnquiry({
+    headcount: data.headcount,
+    budgetFils: data.budgetFils,
+    eventType: data.eventType,
+  });
+
+  try {
+    await asService(
+      async (tx) => tx`
+        insert into event_enquiries (
+          name, email, phone, company, event_date, headcount, budget_fils,
+          event_type, message, routed_to, routing_reason, locale
+        ) values (
+          ${data.name}, ${data.email}, ${data.phone}, ${data.company || null},
+          ${data.eventDate}, ${data.headcount}, ${data.budgetFils ?? null},
+          ${data.eventType}::event_type, ${data.message},
+          ${routing.route}::event_enquiry_route, ${routing.reason}, ${data.locale}
+        )
+      `,
+    );
+  } catch (error) {
+    console.error('[event-enquiry] insert failed', error);
+    return { status: 'error', message: dict.forms.errorBody, values: echoed };
+  }
+
+  const alert = eventEnquiryAlertEmail({
+    name: data.name,
+    email: data.email,
+    phone: data.phone,
+    eventDate: data.eventDate,
+    headcount: data.headcount,
+    budgetFils: data.budgetFils ?? null,
+    eventType: data.eventType,
+    message: data.message,
+    routedTo: routing.route,
+    routingReason: routing.reason,
+  });
+  sendEmailDetached({
+    to: brand.contact.bookingsEmail,
+    replyTo: data.email,
+    subject: alert.subject,
+    html: alert.html,
+    template: 'event-enquiry-alert',
+    meta: { routedTo: routing.route, headcount: data.headcount },
+  });
+
+  return {
+    status: 'success',
+    message:
+      locale === 'ar'
+        ? 'وصلنا طلبك. سنعود إليك خلال يوم عمل بأرقام واضحة.'
+        : 'That reached us. We will come back within a working day with real numbers.',
+  };
 }

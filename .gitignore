@@ -39,3 +39,6 @@ yarn-error.log*
 /tmp
 lighthouse/*.report.html
 lighthouse/*.report.json
+
+# Asset-pipeline scratch (source footage for the pour sequence)
+.cache/

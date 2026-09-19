@@ -43,7 +43,7 @@ export const journalPosts: readonly JournalPost[] = [
     publishedAt: '2026-08-14',
     author: { name: 'Nadia Haddad', role: 'Founder and head roaster' },
     heroImageKey: 'beansTexture',
-    wordCount: 1180,
+    wordCount: 643,
     keywords: ['Ethiopian coffee', 'Guji Uraga', 'specialty coffee sourcing', 'natural process'],
   },
   {
@@ -58,7 +58,7 @@ export const journalPosts: readonly JournalPost[] = [
     publishedAt: '2026-07-02',
     author: { name: 'Rami Kassab', role: 'Head chef' },
     heroImageKey: 'brunchSpread',
-    wordCount: 1040,
+    wordCount: 634,
     keywords: ['Dubai brunch', 'brunch guide Dubai', 'where to brunch Al Quoz'],
   },
   {
@@ -73,7 +73,7 @@ export const journalPosts: readonly JournalPost[] = [
     publishedAt: '2026-06-11',
     author: { name: 'Nadia Haddad', role: 'Founder and head roaster' },
     heroImageKey: 'karak',
-    wordCount: 960,
+    wordCount: 599,
     keywords: ['karak Dubai', 'UAE Brewers Cup', 'barista profile Dubai'],
   },
   {
@@ -88,7 +88,7 @@ export const journalPosts: readonly JournalPost[] = [
     publishedAt: '2026-05-20',
     author: { name: 'Nadia Haddad', role: 'Founder and head roaster' },
     heroImageKey: 'spaceMorning',
-    wordCount: 1120,
+    wordCount: 641,
     keywords: ['Alserkal Avenue guide', 'things to do Al Quoz', 'Dubai art district'],
   },
 ];

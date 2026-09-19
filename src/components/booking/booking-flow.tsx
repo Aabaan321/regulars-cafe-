@@ -1,10 +1,11 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { createBooking, type BookingResult } from '@/lib/actions/booking';
 import { BotFields, Field } from '@/components/forms/form-parts';
 import { brand } from '@/lib/config/brand';
-import { fill, formatNumber, type Dictionary, type Locale } from '@/lib/i18n/dictionaries';
+import { formatNumber, type Dictionary, type Locale } from '@/lib/i18n/dictionaries';
 import type { SlotReason, SlotView } from '@/lib/db/queries';
 import type { TierId } from '@/lib/config/navigation';
 
@@ -48,7 +49,8 @@ export interface BookingFlowProps {
 }
 
 interface AvailabilityState {
-  readonly loading: boolean;
+  /** Which "date|party" the slots below belong to; null until one loads. */
+  readonly key: string | null;
   readonly slots: readonly SlotView[];
   readonly error: string | null;
 }
@@ -62,13 +64,26 @@ export function BookingFlow({
   privateHireHref,
   renderFloorPlan,
 }: BookingFlowProps) {
-  const [step, setStep] = useState<Step>(0);
-  const [partySize, setPartySize] = useState<number | null>(null);
-  const [date, setDate] = useState<string | null>(null);
+  // Restored from the URL during the first render rather than in an effect:
+  // reading it afterwards and calling setState renders the whole flow twice
+  // and briefly shows step 1 to someone who deep-linked to step 3.
+  const searchParams = useSearchParams();
+  const initialParty = (() => {
+    const value = Number(searchParams.get('party'));
+    return Number.isInteger(value) && value >= 1 && value <= maxPartySize ? value : null;
+  })();
+  const initialDate = (() => {
+    const value = searchParams.get('date');
+    return value && dates.some((d) => d.iso === value) ? value : null;
+  })();
+
+  const [step, setStep] = useState<Step>(initialParty === null ? 0 : initialDate ? 2 : 1);
+  const [partySize, setPartySize] = useState<number | null>(initialParty);
+  const [date, setDate] = useState<string | null>(initialDate);
   const [slot, setSlot] = useState<SlotView | null>(null);
   const [tableId, setTableId] = useState<string | null>(null);
   const [availability, setAvailability] = useState<AvailabilityState>({
-    loading: false,
+    key: null,
     slots: [],
     error: null,
   });
@@ -79,20 +94,6 @@ export function BookingFlow({
   const firstRender = useRef(true);
 
   /* ── URL state, so back and refresh both work ───────────────────────────── */
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const p = Number(params.get('party'));
-    const d = params.get('date');
-    if (p >= 1 && p <= maxPartySize) {
-      setPartySize(p);
-      setStep(1);
-      if (d && dates.some((x) => x.iso === d)) {
-        setDate(d);
-        setStep(2);
-      }
-    }
-  }, [dates, maxPartySize]);
 
   const syncUrl = useCallback((next: { party?: number | null; date?: string | null }) => {
     const params = new URLSearchParams(window.location.search);
@@ -143,25 +144,49 @@ export function BookingFlow({
 
   /* ── Slots for the chosen day ───────────────────────────────────────────── */
 
-  const loadSlots = useCallback(async () => {
-    if (partySize === null || !date) return;
-    setAvailability({ loading: true, slots: [], error: null });
-    try {
-      const res = await fetch(`/api/availability?date=${date}&partySize=${partySize}`);
-      if (!res.ok) {
-        setAvailability({ loading: false, slots: [], error: dict.forms.errorBody });
-        return;
-      }
-      const body = (await res.json()) as { slots: SlotView[] };
-      setAvailability({ loading: false, slots: body.slots ?? [], error: null });
-    } catch {
-      setAvailability({ loading: false, slots: [], error: dict.forms.errorBody });
-    }
-  }, [partySize, date, dict.forms.errorBody]);
+  const slotKey = partySize !== null && date ? `${date}|${partySize}` : null;
 
+  // Bumped when a slot is taken mid-form, to force a refetch of the same day.
+  const [reloadToken, setReloadToken] = useState(0);
+
+  /**
+   * Fetches the day's slots.
+   *
+   * The request is inlined here with an AbortController rather than hidden in
+   * a callback: a guest who clicks through three dates quickly fires three
+   * requests, and without the abort the slowest response wins and shows slots
+   * for a day they are no longer looking at.
+   */
   useEffect(() => {
-    if (step === 2) void loadSlots();
-  }, [step, loadSlots]);
+    if (step !== 2 || partySize === null || !date) return;
+
+    const key = `${date}|${partySize}`;
+    const controller = new AbortController();
+
+    void (async () => {
+      try {
+        const res = await fetch(`/api/availability?date=${date}&partySize=${partySize}`, {
+          signal: controller.signal,
+        });
+        if (!res.ok) {
+          setAvailability({ key, slots: [], error: dict.forms.errorBody });
+          return;
+        }
+        const body = (await res.json()) as { slots: SlotView[] };
+        setAvailability({ key, slots: body.slots ?? [], error: null });
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        console.error('[booking] availability fetch failed', error);
+        setAvailability({ key, slots: [], error: dict.forms.errorBody });
+      }
+    })();
+
+    return () => controller.abort();
+  }, [step, partySize, date, reloadToken, dict.forms.errorBody]);
+
+  // Loading is derived rather than stored, so nothing is set synchronously in
+  // the effect and the flow does not render twice on every step change.
+  const slotsLoading = step === 2 && slotKey !== null && availability.key !== slotKey;
 
   const grouped = useMemo(() => {
     const byPeriod = new Map<string, SlotView[]>();
@@ -214,7 +239,7 @@ export function BookingFlow({
         // The slot went while they were typing. Go back and refresh honestly.
         setSlot(null);
         setStep(2);
-        void loadSlots();
+        setReloadToken((n) => n + 1);
       }
     });
   }
@@ -364,7 +389,7 @@ export function BookingFlow({
             </p>
           ) : null}
 
-          {availability.loading ? (
+          {slotsLoading ? (
             <div className="mt-6 grid grid-cols-3 gap-2 sm:grid-cols-5">
               {Array.from({ length: 15 }, (_, i) => (
                 <div key={i} className="skeleton h-11 rounded-[var(--radius-sm)]" />

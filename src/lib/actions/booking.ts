@@ -10,7 +10,7 @@ import {
   waitlistJoinedEmail,
 } from '@/lib/email/templates';
 import { buildIcs } from '@/lib/email/ics';
-import { hashToken, issueOpaqueToken, issueToken, parseToken } from '@/lib/utils/tokens';
+import { hashToken, issueOpaqueToken, parseToken } from '@/lib/utils/tokens';
 import { looksAutomated, rateLimit } from '@/lib/utils/rate-limit';
 import { createReservationSchema, toFieldErrors, waitlistSchema } from '@/lib/validation/schemas';
 import { getDictionary, type Locale } from '@/lib/i18n/dictionaries';
