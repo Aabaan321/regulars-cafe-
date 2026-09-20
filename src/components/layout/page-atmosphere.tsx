@@ -30,10 +30,29 @@ import manifest from '@/lib/content/pour-sequence.json';
  * warmth, none of the bytes. Tier 1 gets nothing, and that is the point.
  */
 
-const bloom = manifest.sequences.bloom;
+const sequences = manifest.sequences;
 
 /** Routes that run their own narrative and must not have a second layer. */
 const OWNS_ITS_BACKGROUND = /^\/(?:ar\/)?immersive\/?$/;
+
+/**
+ * Which footage sits behind which page.
+ *
+ * One clip everywhere reads as wallpaper within about three clicks. Matching
+ * the plate to the page costs nothing extra — the frames are already built
+ * and each device only ever fetches the one it lands on — and it makes the
+ * site feel authored rather than themed.
+ *
+ * `bloom` is the default because it is the most abstract of the three and
+ * therefore the safest under copy it was not chosen for.
+ */
+function sequenceForRoute(pathname: string): keyof typeof sequences {
+  const path = pathname.replace(/^\/ar/, '');
+  if (path.includes('/menu') || path.includes('/order')) return 'pour';
+  if (path.includes('/story') || path.includes('/journal')) return 'beans';
+  if (path.includes('/book') || path.includes('/visit')) return 'bloom';
+  return 'bloom';
+}
 
 export function PageAtmosphere({ tier, dir }: { tier: string; dir: 'ltr' | 'rtl' }) {
   const pathname = usePathname();
@@ -42,16 +61,27 @@ export function PageAtmosphere({ tier, dir }: { tier: string; dir: 'ltr' | 'rtl'
   if (tier === 'essential') return null;
   if (OWNS_ITS_BACKGROUND.test(pathname)) return null;
 
+  const sequence = sequenceForRoute(pathname);
+
   return tier === 'immersive' ? (
-    <ScrubbedAtmosphere dir={dir} mounted={mounted} />
+    <ScrubbedAtmosphere key={sequence} sequence={sequence} dir={dir} mounted={mounted} />
   ) : (
-    <StillAtmosphere dir={dir} />
+    <StillAtmosphere sequence={sequence} dir={dir} />
   );
 }
 
 /* ── Tier 3: the bloom, scrubbed by page scroll ─────────────────────────── */
 
-function ScrubbedAtmosphere({ dir, mounted }: { dir: 'ltr' | 'rtl'; mounted: boolean }) {
+function ScrubbedAtmosphere({
+  sequence,
+  dir,
+  mounted,
+}: {
+  sequence: keyof typeof sequences;
+  dir: 'ltr' | 'rtl';
+  mounted: boolean;
+}) {
+  const spec = sequences[sequence];
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const variant = useClientValue<'wide' | 'tall'>(
     () => (window.innerWidth / window.innerHeight < 0.9 ? 'tall' : 'wide'),
@@ -69,11 +99,11 @@ function ScrubbedAtmosphere({ dir, mounted }: { dir: 'ltr' | 'rtl'; mounted: boo
     const context = canvas.getContext('2d', { alpha: false });
     if (!context) return;
 
-    const sequence = new FrameSequence(
-      bloom.basePath,
+    const frames = new FrameSequence(
+      spec.basePath,
       variant,
-      bloom.frameCount,
-      Math.round(bloom.frameCount * profile.frameBudget),
+      spec.frameCount,
+      Math.round(spec.frameCount * profile.frameBudget),
     );
 
     let drawn = -1;
@@ -95,10 +125,10 @@ function ScrubbedAtmosphere({ dir, mounted }: { dir: 'ltr' | 'rtl'; mounted: boo
 
       const max = document.documentElement.scrollHeight - window.innerHeight;
       const local = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
-      const target = Math.min(bloom.frameCount - 1, Math.round(local * (bloom.frameCount - 1)));
-      sequence.prioritise(target);
+      const target = Math.min(spec.frameCount - 1, Math.round(local * (spec.frameCount - 1)));
+      frames.prioritise(target);
 
-      const pick = sequence.nearest(target);
+      const pick = frames.nearest(target);
       if (!pick || pick.index === drawn) return;
 
       const image = pick.image;
@@ -116,7 +146,7 @@ function ScrubbedAtmosphere({ dir, mounted }: { dir: 'ltr' | 'rtl'; mounted: boo
     // After `load` and after idle. Decoration never competes with the page.
     let idle = 0;
     const begin = (): void => {
-      sequence.start();
+      frames.start();
       frame = requestAnimationFrame(tick);
     };
     if (document.readyState === 'complete') {
@@ -135,9 +165,9 @@ function ScrubbedAtmosphere({ dir, mounted }: { dir: 'ltr' | 'rtl'; mounted: boo
       cancelAnimationFrame(frame);
       cancelIdle(idle);
       observer.disconnect();
-      sequence.destroy();
+      frames.destroy();
     };
-  }, [mounted, variant]);
+  }, [mounted, variant, spec]);
 
   return (
     <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
@@ -145,7 +175,7 @@ function ScrubbedAtmosphere({ dir, mounted }: { dir: 'ltr' | 'rtl'; mounted: boo
           A decorative background for a canvas that draws over it; it must not
           compete for priority with the page's real LCP image. */}
       <img
-        src={`${bloom.basePath}/poster-${variant}.webp`}
+        src={`${spec.basePath}/poster-${variant}.webp`}
         alt=""
         loading="lazy"
         decoding="async"
@@ -162,12 +192,18 @@ function ScrubbedAtmosphere({ dir, mounted }: { dir: 'ltr' | 'rtl'; mounted: boo
 
 /* ── Tier 2: the same warmth, one frame, drifting ───────────────────────── */
 
-function StillAtmosphere({ dir }: { dir: 'ltr' | 'rtl' }) {
+function StillAtmosphere({
+  sequence,
+  dir,
+}: {
+  sequence: keyof typeof sequences;
+  dir: 'ltr' | 'rtl';
+}) {
   return (
     <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
       {/* eslint-disable-next-line @next/next/no-img-element -- decorative. */}
       <img
-        src={`${bloom.basePath}/poster-wide.webp`}
+        src={`${sequences[sequence].basePath}/poster-wide.webp`}
         alt=""
         loading="lazy"
         decoding="async"

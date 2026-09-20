@@ -132,10 +132,14 @@ function SequenceLayer({
       const node = ref.current;
       if (node) {
         const p = progress.current;
-        const alpha = Math.min(
-          sectionProgress(p, inStart, inEnd),
-          1 - sectionProgress(p, outStart, outEnd),
-        );
+        /*
+         * A zero-width fade-in window means "already fully in", not "never
+         * in". `sectionProgress` returns 0 for an empty range, which silently
+         * made the pour — the first thing anyone sees on this page —
+         * invisible at scroll 0, because its window was [0, 0].
+         */
+        const fadedIn = inEnd > inStart ? sectionProgress(p, inStart, inEnd) : 1;
+        const alpha = Math.min(fadedIn, 1 - sectionProgress(p, outStart, outEnd));
         node.style.opacity = String(Math.max(0, alpha));
         // Fully transparent layers should not cost a composite.
         node.style.visibility = alpha <= 0.002 ? 'hidden' : 'visible';

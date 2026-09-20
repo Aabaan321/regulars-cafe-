@@ -202,10 +202,11 @@ body:has([data-tier='immersive']) .bg-bg-subtle {
   background-color: color-mix(in oklab, var(--c-bg-subtle) 64%, transparent);
 }
 
-/* Cards keep their own surface — a translucent card over a moving plate is
-   where text contrast actually starts to fail. */
-body:has([data-tier='signature']) .card,
-body:has([data-tier='immersive']) .card {
+/* Tier 2's cards keep their own near-solid surface — a translucent card over
+   a moving plate is where text contrast starts to fail. Tier 3's cards are
+   glass instead, and that rule lives in the Liquid glass block below; this
+   one deliberately does not name Tier 3, so the two never fight. */
+body:has([data-tier='signature']) .card {
   background-color: color-mix(in oklab, var(--c-surface) 94%, transparent);
   backdrop-filter: blur(6px);
 }
@@ -362,6 +363,172 @@ body:has([data-tier='immersive']) .card {
 [data-tier='immersive'] .section-y + .section-y {
   border-block-start: 1px solid color-mix(in oklab, var(--c-border) 60%, transparent);
 }
+
+/* ── Tier 3 · Liquid glass ───────────────────────────────────────────────
+
+   Tier 3 runs a filmed plate behind every page, and the panels on top of it
+   are glass rather than paint: they refract and tint what is moving behind
+   them instead of hiding it. That is the whole reason the tier can justify
+   its own look — the material only works if there is something alive to
+   refract, and Tiers 1 and 2 have nothing behind the page to bend.
+
+   Four things make it read as glass rather than as "a card with blur on it":
+
+     1. **Saturation.** `backdrop-filter: saturate()` above 1 is what stops
+        blurred coffee going muddy grey. Blur alone reads as frosted plastic.
+     2. **A lit top edge.** Real glass catches light on the edge facing the
+        source. An inset hairline highlight along the top, and a darker one
+        along the bottom, gives thickness — without it a panel is a flat
+        rectangle no matter how much blur is on it.
+     3. **A specular sweep.** A wide, very low-opacity diagonal gradient
+        across the surface, which is the reflection of the room.
+     4. **A border that is lighter at the top than the bottom.** Uniform
+        borders look printed; graded ones look like an edge.
+
+   Cost control: `backdrop-filter` is a per-pixel composite of everything
+   behind the element, so it is applied to *panels* — cards, the header, the
+   tier pill — and never to anything full-bleed or repeated dozens of times
+   in a list.                                                               */
+
+[data-tier='immersive'] {
+  --glass-tint: color-mix(in oklab, var(--c-surface) 46%, transparent);
+  --glass-tint-strong: color-mix(in oklab, var(--c-surface) 66%, transparent);
+  --glass-edge-top: color-mix(in oklab, #fff 26%, transparent);
+  --glass-edge-bottom: color-mix(in oklab, #000 24%, transparent);
+  --glass-blur: 22px;
+}
+
+/* The light theme has less contrast to play with, so the tint carries more
+   of the work and the highlight is softer. */
+[data-theme='light'] [data-tier='immersive'] {
+  --glass-tint: color-mix(in oklab, var(--c-surface) 62%, transparent);
+  --glass-tint-strong: color-mix(in oklab, var(--c-surface) 78%, transparent);
+  --glass-edge-top: color-mix(in oklab, #fff 62%, transparent);
+  --glass-edge-bottom: color-mix(in oklab, #000 8%, transparent);
+}
+
+/*
+   No hand-written `-webkit-backdrop-filter` anywhere in this file. Lightning
+   CSS prefixes from the browser targets on its own, and a manual prefixed
+   copy written *after* the standard property makes it drop the unprefixed
+   one — which is the property Chromium actually reads. The result is a rule
+   that looks correct in source and does nothing in the browser.
+*/
+@utility glass {
+  position: relative;
+  background-color: var(--glass-tint);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.7);
+  border: 1px solid color-mix(in oklab, var(--c-border) 70%, transparent);
+  box-shadow:
+    inset 0 1px 0 0 var(--glass-edge-top),
+    inset 0 -1px 0 0 var(--glass-edge-bottom),
+    0 18px 40px -24px rgb(0 0 0 / 0.55);
+}
+
+/* The specular sweep. A pseudo-element so it never affects layout and can be
+   dropped wholesale when the browser cannot do backdrop-filter. */
+@utility glass-sheen {
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(
+      125deg,
+      color-mix(in oklab, #fff 11%, transparent) 0%,
+      transparent 38%,
+      transparent 68%,
+      color-mix(in oklab, #fff 5%, transparent) 100%
+    );
+  }
+}
+
+body:has([data-tier='immersive']) .card {
+  background-color: var(--glass-tint);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.7);
+  border-color: color-mix(in oklab, var(--c-border) 70%, transparent);
+  box-shadow:
+    inset 0 1px 0 0 var(--glass-edge-top),
+    inset 0 -1px 0 0 var(--glass-edge-bottom),
+    0 18px 40px -24px rgb(0 0 0 / 0.55);
+}
+
+body:has([data-tier='immersive']) .card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    125deg,
+    color-mix(in oklab, #fff 10%, transparent) 0%,
+    transparent 40%,
+    transparent 70%,
+    color-mix(in oklab, #fff 4%, transparent) 100%
+  );
+}
+
+/* `.card` sets `position` only sometimes; the sheen needs a containing block
+   and the sticky-column tricks elsewhere need it not to be `static`. */
+body:has([data-tier='immersive']) .card {
+  position: relative;
+  isolation: isolate;
+}
+
+/* Buttons, chips and inputs are small panes of the same material. */
+body:has([data-tier='immersive']) .btn-secondary,
+body:has([data-tier='immersive']) .chip,
+body:has([data-tier='immersive']) .input,
+body:has([data-tier='immersive']) select,
+body:has([data-tier='immersive']) textarea {
+  background-color: var(--glass-tint);
+  backdrop-filter: blur(14px) saturate(1.6);
+  border-color: color-mix(in oklab, var(--c-border) 76%, transparent);
+  box-shadow: inset 0 1px 0 0 var(--glass-edge-top);
+}
+
+/* The header is the one pane that is always over moving footage, so it gets
+   the strongest tint — a nav you cannot read is not a nav. */
+body:has([data-tier='immersive']) header {
+  background-color: var(--glass-tint-strong) !important;
+  /* `!important` here too: the header carries a Tailwind `backdrop-blur-lg`
+     utility, and utilities win on cascade order regardless of specificity. */
+  backdrop-filter: blur(26px) saturate(1.8) !important;
+  box-shadow: inset 0 -1px 0 0 color-mix(in oklab, #fff 10%, transparent);
+}
+
+/* Sections stop painting a flat tone and become glass sheets instead, so the
+   plate behind them stays visible the whole way down the page. */
+body:has([data-tier='immersive']) .section-y.bg-bg-subtle,
+body:has([data-tier='immersive']) section.bg-bg-subtle {
+  background-color: color-mix(in oklab, var(--c-bg-subtle) 42%, transparent);
+  backdrop-filter: blur(18px) saturate(1.5);
+}
+
+/*
+   Without `backdrop-filter` the tint alone would leave text on a
+   near-transparent panel over moving footage, which is unreadable. So the
+   fallback is not "less glass" — it is a solid surface.
+*/
+@supports not (backdrop-filter: blur(1px)) {
+  body:has([data-tier='immersive']) .card,
+  body:has([data-tier='immersive']) header,
+  body:has([data-tier='immersive']) .btn-secondary,
+  body:has([data-tier='immersive']) .chip,
+  body:has([data-tier='immersive']) .input {
+    background-color: var(--c-surface);
+  }
+}
+
+/*
+   Note on `prefers-reduced-motion`: the glass deliberately survives it.
+   That query is about *motion*, and a static blur is not motion — dropping
+   the material would change the design for those visitors rather than
+   calming it, which is not what they asked for. What they do get turned off
+   is everything that actually moves: the scrubbed sequences, the drifting
+   plate and the scroll reveals, each handled at its own source.
+*/
 
 /* Tier 2 and 3 buy motion; Tier 1 does not pretend to have it. Cards lift,
    images breathe, and anything marked `data-motion-only` is hidden outright
