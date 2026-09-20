@@ -21,12 +21,12 @@ import type { ResolvedThumbnail } from '@/lib/content/menu-display';
  * still, the page is still a complete, readable article about the café —
  * which is what keeps the SEO of Tier 3 identical to Tier 1 rather than worse.
  *
- * Two layers, each doing the job it is actually good at:
+ * Two kinds of layer, each doing the job it is actually good at:
  *
- *  1. **The pour** — a real filmed pour, scrubbed frame by frame against the
- *     scroll. Photography beats simulation for something the visitor has held
- *     in their hand ten thousand times; a shader cannot fake crema and it is
- *     obvious when it tries.
+ *  1. **The filmed sequences** — real footage, scrubbed frame by frame
+ *     against the scroll. Photography beats simulation for something the
+ *     visitor has held in their hand ten thousand times; a shader cannot fake
+ *     crema and it is obvious when it tries.
  *  2. **The bean field** — genuinely procedural, genuinely WebGL, because a
  *     few hundred beans drifting through real depth is something no film can
  *     give you and no sequence of stills can scrub.
@@ -80,16 +80,20 @@ function NarrativeBody({
   return (
     <>
       {/*
-        Three layers, each owning a stretch of the scroll, so something is
+        Four layers, each owning a stretch of the scroll, so something is
         always moving rather than one shot playing for four seconds and then
         holding for the rest of the page.
 
-          the pour    0.00 → 0.32   a cup filling from empty
-          the beans   0.30 → 0.62   the cascade it was made from
+          the pour    0.00 → 0.32   9.5s of a latte going into a cup
+          the beans   0.30 → 0.62   12s of the cascade it was made from
           the room    0.60 → 0.90   a photograph of the warehouse
+          the finish  0.86 → 1.00   13s of the art being drawn on top
 
         They overlap deliberately: each fades up while the one before it is
-        still on screen, so the narrative dissolves rather than cuts.
+        still on screen, so the narrative dissolves rather than cuts. The last
+        one exists because the page used to run out of footage at 90% and
+        spend its final screen on flat colour, which is a strange note for a
+        tier whose entire argument is that it keeps moving.
       */}
       <SequenceStage
         sequence="pour"
@@ -104,8 +108,18 @@ function NarrativeBody({
         scrub={[0.32, 0.58]}
         fade={[0.28, 0.36, 0.58, 0.66]}
         drift={0.06}
+        deferUntil={0.08}
       />
       <RoomPlate image={closingImage} />
+      <SequenceStage
+        sequence="latte"
+        dir={dir}
+        scrub={[0.84, 1]}
+        fade={[0.84, 0.92, 1, 1]}
+        drift={0.04}
+        deferUntil={0.55}
+        scrim="even"
+      />
 
       {mounted && profile.mode === 'webgl' ? <ArmedStage /> : null}
       {mounted && debug ? <DebugOverlay /> : null}
@@ -161,7 +175,9 @@ function RoomPlate({ image }: { image: ResolvedThumbnail }) {
       const node = ref.current;
       if (node) {
         const inward = sectionProgress(progress.current, 0.6, 0.68);
-        const outward = 1 - sectionProgress(progress.current, 0.82, 0.9);
+        // Hands over to the closing sequence rather than fading to bare
+        // background, so the two cross-fade the way the others do.
+        const outward = 1 - sectionProgress(progress.current, 0.84, 0.93);
         node.style.opacity = String(Math.min(inward, outward));
       }
       frame = requestAnimationFrame(tick);

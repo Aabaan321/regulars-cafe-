@@ -98,6 +98,35 @@ export class FrameSequence {
     return this.images[index] ?? null;
   }
 
+  /** How many frames this device will fetch in total. */
+  get budget(): number {
+    return this.allowed.size;
+  }
+
+  /**
+   * The nearest loaded frame at or before `index`, within `limit` steps.
+   *
+   * Directional rather than outward, because the caller is cross-fading and
+   * needs one frame on each side of a position — not simply the closest one,
+   * which could be on either.
+   */
+  before(index: number, limit: number): { image: HTMLImageElement; index: number } | null {
+    for (let i = Math.min(index, this.count - 1); i >= Math.max(0, index - limit); i -= 1) {
+      const image = this.frame(i);
+      if (image) return { image, index: i };
+    }
+    return null;
+  }
+
+  /** The nearest loaded frame at or after `index`, within `limit` steps. */
+  after(index: number, limit: number): { image: HTMLImageElement; index: number } | null {
+    for (let i = Math.max(index, 0); i <= Math.min(this.count - 1, index + limit); i += 1) {
+      const image = this.frame(i);
+      if (image) return { image, index: i };
+    }
+    return null;
+  }
+
   /**
    * The closest frame we can actually draw.
    *

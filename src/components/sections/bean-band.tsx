@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { FrameSequence } from '@/lib/webgl/frame-sequence';
+import { ScrubPainter, SCRUB_DPR_PLATE } from '@/lib/webgl/scrub-painter';
 import { detectDeviceProfile } from '@/lib/webgl/capabilities';
 import { useClientValue } from '@/lib/hooks/use-client-value';
 import manifest from '@/lib/content/pour-sequence.json';
@@ -24,7 +25,19 @@ import type { Locale } from '@/lib/i18n/dictionaries';
  * rather than the page.
  */
 
-const beans = manifest.sequences.beans;
+/*
+ * The band runs on `cascade`, not on the narrative's `beans`.
+ *
+ * Two reasons, and they point the same way. It is a band rather than a
+ * full-bleed hero, so it does not need hero frames — plate frames are half
+ * the bytes at a size nobody can tell apart inside a 78svh strip. And
+ * `cascade` is the better shot for it: beans falling onto a bed of more
+ * beans, endlessly, with no beginning or end, which is what a band you can
+ * scroll past in either direction wants. `beans` is a shot that progresses,
+ * and progression belongs to the narrative that has a whole page to spend
+ * on it.
+ */
+const band = manifest.sequences.cascade;
 
 export function BeanBand({
   locale,
@@ -58,30 +71,37 @@ export function BeanBand({
     if (!context) return;
 
     const sequence = new FrameSequence(
-      beans.basePath,
+      band.basePath,
       variant,
-      beans.frameCount,
-      Math.round(beans.frameCount * profile.frameBudget),
+      band.frameCount,
+      // Three fifths of the usual budget on top of the device's own. The band
+      // is one strip of one page, scrubbed across its own travel rather than
+      // a whole document's, so it crosses its frames far faster than a plate
+      // does and simply does not need all of them.
+      Math.round(band.frameCount * profile.frameBudget * 0.6),
     );
 
-    let drawnIndex = -1;
+    // Plate footage, built soft — a retina backing store would be spent
+    // resolving a blur.
+    const painter = new ScrubPainter(canvas, sequence, context, { maxDpr: SCRUB_DPR_PLATE });
     let running = false;
     let started = false;
     let frame = 0;
+    let previous = 0;
 
-    const resize = (): void => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = Math.max(1, Math.round(canvas.clientWidth * dpr));
-      canvas.height = Math.max(1, Math.round(canvas.clientHeight * dpr));
-      drawnIndex = -1;
-    };
-    const resizeObserver = new ResizeObserver(resize);
+    const resizeObserver = new ResizeObserver(() => painter.resize());
     resizeObserver.observe(canvas);
-    resize();
+    painter.resize();
 
-    const tick = (): void => {
+    const tick = (now: number): void => {
       frame = requestAnimationFrame(tick);
-      if (!running || document.hidden) return;
+      if (!running || document.hidden) {
+        previous = now;
+        return;
+      }
+
+      const delta = previous === 0 ? 16.667 : now - previous;
+      previous = now;
 
       // The band's own progress: 0 as its top reaches the bottom of the
       // viewport, 1 as its bottom clears the top.
@@ -89,22 +109,8 @@ export function BeanBand({
       const travel = box.height + window.innerHeight;
       const local = Math.min(1, Math.max(0, (window.innerHeight - box.top) / travel));
 
-      const target = Math.min(beans.frameCount - 1, Math.round(local * (beans.frameCount - 1)));
-      sequence.prioritise(target);
-
-      const pick = sequence.nearest(target);
-      if (!pick || pick.index === drawnIndex) return;
-
-      const image = pick.image;
-      const cover = Math.max(
-        canvas.width / image.naturalWidth,
-        canvas.height / image.naturalHeight,
-      );
-      const w = image.naturalWidth * cover;
-      const h = image.naturalHeight * cover;
-      context.drawImage(image, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h);
-      drawnIndex = pick.index;
-      canvas.style.opacity = '1';
+      painter.render(local, 1, delta);
+      if (painter.hasPainted) canvas.style.opacity = '1';
     };
 
     // Nothing is fetched until the band is close enough to matter — on the story
@@ -143,7 +149,7 @@ export function BeanBand({
           must not compete for the priority budget with the page's real LCP
           image further up. */}
       <img
-        src={`${beans.basePath}/poster-${variant}.webp`}
+        src={`${band.basePath}/poster-${variant}.webp`}
         alt=""
         aria-hidden="true"
         loading="lazy"

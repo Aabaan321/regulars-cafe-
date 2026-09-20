@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 import { FrameSequence } from '@/lib/webgl/frame-sequence';
+import { ScrubPainter, SCRUB_DPR_PLATE } from '@/lib/webgl/scrub-painter';
 import { detectDeviceProfile } from '@/lib/webgl/capabilities';
 import { useClientValue } from '@/lib/hooks/use-client-value';
 import manifest from '@/lib/content/pour-sequence.json';
@@ -12,19 +13,13 @@ import manifest from '@/lib/content/pour-sequence.json';
  *
  * Tier 3's whole promise is motion, and for a while it delivered that on one
  * page and then dropped the visitor onto a static menu. This runs behind
- * *every* Tier 3 route: cream blooming through coffee, scrubbed by how far
- * down the page you are.
+ * *every* Tier 3 route: real footage, scrubbed by how far down the page you
+ * are, so scrolling a page is also playing a shot.
  *
- * The clip was chosen for what it does not contain. There is no cup, no hand
- * and no horizon, so it never fights the text column and never looks wrong at
- * an unexpected crop — it can sit under a menu, a booking form or a journal
- * entry without any of them being laid out around it. Abstract is the
- * requirement here, not a preference.
- *
- * It is deliberately cheap: 72 frames at ~6KB each, capped again by the
- * device budget, fetched only once the page is idle. A page that costs half a
- * megabyte of decoration after it is already interactive is a page that can
- * afford decoration.
+ * It is deliberately cheap: a plate is ~120 frames at ~4KB each, capped again
+ * by the device budget and fetched only once the page is idle. A page that
+ * costs half a megabyte of decoration *after* it is already interactive is a
+ * page that can afford decoration.
  *
  * Tier 2 gets a still frame of the same footage with a slow drift — the same
  * warmth, none of the bytes. Tier 1 gets nothing, and that is the point.
@@ -32,25 +27,49 @@ import manifest from '@/lib/content/pour-sequence.json';
 
 const sequences = manifest.sequences;
 
+type SequenceId = keyof typeof sequences;
+
 /** Routes that run their own narrative and must not have a second layer. */
 const OWNS_ITS_BACKGROUND = /^\/(?:ar\/)?immersive\/?$/;
 
 /**
  * Which footage sits behind which page.
  *
- * One clip everywhere reads as wallpaper within about three clicks. Matching
- * the plate to the page costs nothing extra — the frames are already built
- * and each device only ever fetches the one it lands on — and it makes the
- * site feel authored rather than themed.
+ * One clip everywhere reads as wallpaper within about three clicks, so every
+ * page family has its own, chosen for what the page is about: extraction
+ * behind the menu, the finished drink behind ordering, beans behind the story
+ * of where they come from, the room behind visiting it.
  *
- * `bloom` is the default because it is the most abstract of the three and
- * therefore the safest under copy it was not chosen for.
+ * It costs nothing extra. The frames are all built and committed, and a
+ * device only ever fetches the one sequence for the page it has landed on —
+ * so nine clips and one clip download identically. What differs is that the
+ * site stops feeling themed and starts feeling authored.
+ *
+ * First match wins, and every nested route falls under its section: a
+ * journal entry gets the journal plate, `/book/manage` gets the booking one.
  */
-function sequenceForRoute(pathname: string): keyof typeof sequences {
+const PLATE_BY_SECTION: readonly (readonly [string, SequenceId])[] = [
+  ['/menu', 'espresso'],
+  ['/order', 'latte'],
+  // The story page has its own bean band in the content, on `cascade`, so its
+  // plate is deliberately not beans — two bean shots on one page reads as one
+  // clip failing to load twice.
+  ['/story', 'grind'],
+  ['/journal', 'cascade'],
+  ['/visit', 'room'],
+  ['/events', 'room'],
+  ['/gallery', 'steam'],
+  ['/book', 'bloom'],
+];
+
+function sequenceForRoute(pathname: string): SequenceId {
   const path = pathname.replace(/^\/ar/, '');
-  if (path.includes('/menu') || path.includes('/order')) return 'pour';
-  if (path.includes('/story') || path.includes('/journal')) return 'beans';
-  if (path.includes('/book') || path.includes('/visit')) return 'bloom';
+  for (const [section, id] of PLATE_BY_SECTION) {
+    if (path.includes(section)) return id;
+  }
+  // `bloom` is the fallback because it is the least specific of the set: a
+  // cup being filled, no room and no hands, so it is safe under copy it was
+  // not chosen for.
   return 'bloom';
 }
 
@@ -70,14 +89,24 @@ export function PageAtmosphere({ tier, dir }: { tier: string; dir: 'ltr' | 'rtl'
   );
 }
 
-/* ── Tier 3: the bloom, scrubbed by page scroll ─────────────────────────── */
+/* ── Tier 3: the plate, scrubbed by page scroll ─────────────────────────── */
+
+/**
+ * How much of a push-in the plate gets across a full page.
+ *
+ * Smaller than the narrative's, on purpose. This layer sits behind a page's
+ * actual content rather than being the thing on screen, and a background that
+ * zooms noticeably while you are trying to read a menu is a background that
+ * has misunderstood its job.
+ */
+const PLATE_DRIFT = 0.05;
 
 function ScrubbedAtmosphere({
   sequence,
   dir,
   mounted,
 }: {
-  sequence: keyof typeof sequences;
+  sequence: SequenceId;
   dir: 'ltr' | 'rtl';
   mounted: boolean;
 }) {
@@ -99,48 +128,51 @@ function ScrubbedAtmosphere({
     const context = canvas.getContext('2d', { alpha: false });
     if (!context) return;
 
+    const scrollProgress = (): number => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      return max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+    };
+
     const frames = new FrameSequence(
       spec.basePath,
       variant,
       spec.frameCount,
       Math.round(spec.frameCount * profile.frameBudget),
     );
+    // Starts wherever the visitor already is — a page restored mid-scroll, or
+    // one arrived at through an in-page anchor, must not rewind the shot.
+    // These pages have no Lenis, so the position is raw scroll and takes the
+    // full ease.
+    const painter = new ScrubPainter(canvas, frames, context, {
+      startProgress: scrollProgress(),
+      maxDpr: SCRUB_DPR_PLATE,
+    });
 
-    let drawn = -1;
-    let frame = 0;
-
-    const resize = (): void => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = Math.max(1, Math.round(canvas.clientWidth * dpr));
-      canvas.height = Math.max(1, Math.round(canvas.clientHeight * dpr));
-      drawn = -1;
-    };
-    const observer = new ResizeObserver(resize);
+    const observer = new ResizeObserver(() => painter.resize());
     observer.observe(canvas);
-    resize();
+    painter.resize();
 
-    const tick = (): void => {
+    let frame = 0;
+    let previous = 0;
+    let revealed = false;
+
+    const tick = (now: number): void => {
       frame = requestAnimationFrame(tick);
-      if (document.hidden) return;
+      if (document.hidden) {
+        previous = now;
+        return;
+      }
 
-      const max = document.documentElement.scrollHeight - window.innerHeight;
-      const local = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
-      const target = Math.min(spec.frameCount - 1, Math.round(local * (spec.frameCount - 1)));
-      frames.prioritise(target);
+      const delta = previous === 0 ? 16.667 : now - previous;
+      previous = now;
 
-      const pick = frames.nearest(target);
-      if (!pick || pick.index === drawn) return;
+      const local = scrollProgress();
+      painter.render(local, 1 + PLATE_DRIFT * (1 - local), delta);
 
-      const image = pick.image;
-      const cover = Math.max(
-        canvas.width / image.naturalWidth,
-        canvas.height / image.naturalHeight,
-      );
-      const w = image.naturalWidth * cover;
-      const h = image.naturalHeight * cover;
-      context.drawImage(image, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h);
-      drawn = pick.index;
-      canvas.style.opacity = '1';
+      if (!revealed && painter.hasPainted) {
+        revealed = true;
+        canvas.style.opacity = '1';
+      }
     };
 
     // After `load` and after idle. Decoration never competes with the page.
@@ -192,13 +224,7 @@ function ScrubbedAtmosphere({
 
 /* ── Tier 2: the same warmth, one frame, drifting ───────────────────────── */
 
-function StillAtmosphere({
-  sequence,
-  dir,
-}: {
-  sequence: keyof typeof sequences;
-  dir: 'ltr' | 'rtl';
-}) {
+function StillAtmosphere({ sequence, dir }: { sequence: SequenceId; dir: 'ltr' | 'rtl' }) {
   return (
     <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
       {/* eslint-disable-next-line @next/next/no-img-element -- decorative. */}

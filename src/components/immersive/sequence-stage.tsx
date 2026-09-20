@@ -4,18 +4,26 @@ import Image from 'next/image';
 import { useEffect, useRef } from 'react';
 import { sectionProgress, useImmersive } from '@/components/immersive/scroll-context';
 import { FrameSequence } from '@/lib/webgl/frame-sequence';
+import {
+  ScrubPainter,
+  SCRUB_DPR_HERO,
+  SCRUB_DPR_PLATE,
+  SCRUB_EASE_RAW,
+  SCRUB_EASE_SMOOTHED,
+} from '@/lib/webgl/scrub-painter';
 import { useClientValue } from '@/lib/hooks/use-client-value';
 import manifest from '@/lib/content/pour-sequence.json';
 
 /**
  * A filmed sequence, scrubbed against the scroll wheel.
  *
- * Two of these run on the Immersive tier — a coffee pour and a cascade of
- * beans — and both are real footage cut into stills, not simulation. A
- * shader can place a thousand beans; it cannot give you the tumble and the
- * motion blur of one real one, and it certainly cannot fake crema.
+ * Several of these run on the Immersive tier — a pour, a cascade of beans,
+ * latte art being drawn — and all of them are real footage cut into stills,
+ * not simulation. A shader can place a thousand beans; it cannot give you the
+ * tumble and the motion blur of one real one, and it certainly cannot fake
+ * crema.
  *
- * Three decisions worth defending:
+ * Four decisions worth defending:
  *
  * **Stills, not `<video>`.** Setting `currentTime` on a video seeks to the
  * nearest keyframe, so a scrubbed video stutters, and iOS will not paint one
@@ -31,6 +39,11 @@ import manifest from '@/lib/content/pour-sequence.json';
  * **The canvas contains no text.** Every word of every page is
  * server-rendered HTML in front of it. Turn JavaScript off and you get the
  * poster and the full article.
+ *
+ * **Between two frames is a real position.** The scroll position is kept as a
+ * float and the two frames either side of it are cross-faded, so the sequence
+ * is continuous rather than a step function — see `ScrubPainter`, which also
+ * owns the easing that stops a wheel notch reading as a jump.
  */
 
 type SequenceId = keyof typeof manifest.sequences;
@@ -46,6 +59,16 @@ export interface SequenceStageProps {
   readonly fade?: readonly [number, number, number, number];
   /** Slow push-in through the scrub, then drift, as a scale delta. */
   readonly drift?: number;
+  /**
+   * Global scroll position below which this layer fetches nothing at all.
+   *
+   * The home page runs three sequences now, and a layer that only appears in
+   * the last sixth of the scroll has no business downloading itself while the
+   * visitor is still looking at the first. Same argument as the WebGL stage,
+   * which is likewise armed by a gesture the visitor has already committed
+   * to rather than on load.
+   */
+  readonly deferUntil?: number;
   readonly priority?: boolean;
   readonly scrim?: 'column' | 'even' | 'none';
 }
@@ -56,6 +79,7 @@ export function SequenceStage({
   scrub,
   fade,
   drift = 0.08,
+  deferUntil = 0,
   priority = false,
   scrim = 'column',
 }: SequenceStageProps) {
@@ -105,6 +129,11 @@ export function SequenceStage({
           drift={drift}
           budget={Math.round(spec.frameCount * profile.frameBudget)}
           label={sequence}
+          smoothedInput={profile.mode !== 'fallback'}
+          deferUntil={deferUntil}
+          // Plate-role footage is built soft and small; a retina backing
+          // store would be spent resolving a blur.
+          maxDpr={spec.role === 'plate' ? SCRUB_DPR_PLATE : SCRUB_DPR_HERO}
         />
       ) : null}
 
@@ -171,6 +200,9 @@ function SequenceCanvas({
   drift,
   budget,
   label,
+  smoothedInput,
+  deferUntil,
+  maxDpr,
 }: {
   basePath: string;
   frameCount: number;
@@ -179,6 +211,9 @@ function SequenceCanvas({
   drift: number;
   budget: number;
   label: string;
+  smoothedInput: boolean;
+  deferUntil: number;
+  maxDpr: number;
 }) {
   const { progress, setReady } = useImmersive();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -191,86 +226,53 @@ function SequenceCanvas({
     if (!context) return;
 
     const sequence = new FrameSequence(basePath, variant, frameCount, budget);
+    const painter = new ScrubPainter(canvas, sequence, context, {
+      // Pinned to wherever the visitor already is. Easing in from frame 0 on
+      // a page restored mid-scroll would play the shot at them unasked.
+      startProgress: sectionProgress(progress.current, scrubStart, scrubEnd),
+      // On this page Lenis has already interpolated the scroll, so there is
+      // nothing left to smooth — only lag left to add. The fallback profile
+      // does not run Lenis and reads the native scroll, so it still wants it.
+      ease: smoothedInput ? SCRUB_EASE_SMOOTHED : SCRUB_EASE_RAW,
+      maxDpr,
+    });
 
-    /* ── What has been drawn ───────────────────────────────────────────── */
-
-    let drawnIndex = -1;
-    let drawnScale = -1;
-    let requested = -1;
-    let revealed = false;
-
-    /* ── Backing store ─────────────────────────────────────────────────── */
-
-    const resize = (): void => {
-      // Capped at 2 like every other surface here: past that you pay double
-      // the fill rate for a difference nobody has ever seen.
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = Math.max(1, Math.round(canvas.clientWidth * dpr));
-      canvas.height = Math.max(1, Math.round(canvas.clientHeight * dpr));
-      drawnIndex = -1; // force a redraw into the new buffer
-    };
-
-    const observer = new ResizeObserver(resize);
+    const observer = new ResizeObserver(() => painter.resize());
     observer.observe(canvas);
-    resize();
+    painter.resize();
 
-    /* ── Drawing ───────────────────────────────────────────────────────── */
-
-    const paint = (image: HTMLImageElement, index: number, scale: number): void => {
-      const width = canvas.width;
-      const height = canvas.height;
-      const cover = Math.max(width / image.naturalWidth, height / image.naturalHeight) * scale;
-      const drawWidth = image.naturalWidth * cover;
-      const drawHeight = image.naturalHeight * cover;
-
-      context.drawImage(
-        image,
-        (width - drawWidth) / 2,
-        (height - drawHeight) / 2,
-        drawWidth,
-        drawHeight,
-      );
-
-      drawnIndex = index;
-      drawnScale = scale;
-
-      if (!revealed) {
-        revealed = true;
-        // Cross-fades over the poster it is identical to, so the handover is
-        // invisible rather than a flash.
-        canvas.style.opacity = '1';
-        setReady(true);
-      }
-    };
-
-    /* ── The loop ──────────────────────────────────────────────────────── */
-
+    let revealed = false;
     let frame = 0;
-    const tick = (): void => {
+    let previous = 0;
+
+    const tick = (now: number): void => {
       frame = requestAnimationFrame(tick);
-      if (document.hidden) return;
+      if (document.hidden) {
+        previous = now;
+        return;
+      }
+
+      const delta = previous === 0 ? 16.667 : now - previous;
+      previous = now;
 
       const global = progress.current;
-      const local = sectionProgress(global, scrubStart, scrubEnd);
-      const target = Math.min(frameCount - 1, Math.round(local * (frameCount - 1)));
+      if (!fetching && global >= deferUntil) fetchNow();
 
-      if (target !== requested) {
-        sequence.prioritise(target);
-        requested = target;
-      }
+      const local = sectionProgress(global, scrubStart, scrubEnd);
 
       // A slow push-in through the shot, then an equally slow drift out, so
       // a held frame never reads as a frozen one.
       const hold = sectionProgress(global, scrubEnd, Math.min(1, scrubEnd + 0.45));
       const scale = 1 + drift - local * drift + hold * (drift * 1.5);
 
-      const pick = sequence.nearest(target);
-      if (!pick) return;
+      painter.render(local, scale, delta);
 
-      // Redraw only when something moved. A stationary reader costs one ref
-      // read per frame and no GPU work at all.
-      if (pick.index !== drawnIndex || Math.abs(scale - drawnScale) > 0.0015) {
-        paint(pick.image, pick.index, scale);
+      if (!revealed && painter.hasPainted) {
+        revealed = true;
+        // Cross-fades over the poster it is identical to, so the handover is
+        // invisible rather than a flash.
+        canvas.style.opacity = '1';
+        setReady(true);
       }
     };
 
@@ -282,11 +284,22 @@ function SequenceCanvas({
      * hydrating and settling the layout.
      */
     let idle = 0;
-    const begin = (): void => {
+    let fetching = false;
+
+    const fetchNow = (): void => {
+      if (fetching) return;
+      fetching = true;
       sequence.start(({ loaded, total }) => {
         const node = document.getElementById('immersive-debug-frames');
         if (node) node.textContent = `${label} ${loaded}/${total} · ${variant}`;
       });
+    };
+
+    const begin = (): void => {
+      // The loop always runs — it is what notices the visitor arriving — but
+      // a deferred layer downloads nothing until they are close enough for it
+      // to matter. Cheap: one ref read per frame until then.
+      if (deferUntil <= 0) fetchNow();
       frame = requestAnimationFrame(tick);
     };
 
@@ -317,6 +330,9 @@ function SequenceCanvas({
     scrubEnd,
     drift,
     label,
+    smoothedInput,
+    deferUntil,
+    maxDpr,
     progress,
     setReady,
   ]);

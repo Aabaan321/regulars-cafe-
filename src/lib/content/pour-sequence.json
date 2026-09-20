@@ -8,11 +8,15 @@
         "credit": "Mixkit — https://mixkit.co/free-stock-video/making-coffee-with-whipped-cream-3581/",
         "licence": "Mixkit Free Stock Video License (commercial use, no attribution required)"
       },
+      "role": "hero",
+      "note": "The pour, whole: 9.5s where only the first 3.9s used to be shown.",
       "window": {
         "startSeconds": 0.1,
-        "endSeconds": 4
+        "endSeconds": 9.6,
+        "seconds": 9.5,
+        "fps": 18
       },
-      "frameCount": 96,
+      "frameCount": 171,
       "basePath": "/immersive/pour",
       "blurDataURL": "data:image/webp;base64,UklGRqIAAABXRUJQVlA4IJYAAACQBACdASoUAAsAPsFOoEqnpCMhsAgA8BgJYwC7GuADz8IfJEr38HLXzBdbMgAA/Dbpv7+YMZe1o+tKuyZU9mhIAgLCoDBDyB0ixr5P4DWwnN5zk8VJ59kq+C015P8XhJ7Iprcz0AETWFkDrwxBlupkWeqLCcPmPquWJRtmhF3NJr9QT6wHaq0DrYtyDAybPG/5o4sYAAA=",
       "variants": [
@@ -20,13 +24,13 @@
           "id": "wide",
           "width": 1280,
           "height": 720,
-          "bytes": 1341270
+          "bytes": 2414016
         },
         {
           "id": "tall",
-          "width": 720,
-          "height": 960,
-          "bytes": 817066
+          "width": 704,
+          "height": 940,
+          "bytes": 1521998
         }
       ],
       "posterBytes": 35970
@@ -38,58 +42,270 @@
         "credit": "Mixkit — https://mixkit.co/free-stock-video/coffee-beans-falling-into-a-coffee-pot-4985/",
         "licence": "Mixkit Free Stock Video License (commercial use, no attribution required)"
       },
+      "role": "hero",
+      "note": "Three times the old window, and the part where the beans actually leave the scoop.",
       "window": {
-        "startSeconds": 10.4,
-        "endSeconds": 16.6
+        "startSeconds": 0.4,
+        "endSeconds": 12.4,
+        "seconds": 12,
+        "fps": 14
       },
-      "frameCount": 84,
+      "frameCount": 168,
       "basePath": "/immersive/beans",
-      "blurDataURL": "data:image/webp;base64,UklGRpIAAABXRUJQVlA4IIYAAAAQBACdASoUAAsAPsFOoEqnpCMhsAgA8BgJQBOgMVuYb6XHFQBLGbLi0AD+qrOEP/0zSMBtCmSuGK64g+0eV158QRZVUgTe6zbNDeVUZzA89IbYCzWL9/JuEQmGB/nxJk1eByzu2HcZZLr1AIFXjECSWsCcwJkRdwmHN6ueWE5p/X5f0TAAAA==",
+      "blurDataURL": "data:image/webp;base64,UklGRpQAAABXRUJQVlA4IIgAAABQBACdASoUAAsAPsFOoEqnpCMhsAgA8BgJZQC7AYty5M0w9FnfWhAOiRRoAP7RHCOrBJy06afAq8II/JFBz7vgvk47vTUaK3z36+S01D7mYXD36KyKrDAOsKXCwdD20HglbOGrNFb7x/Dn2DyDYPILuT98O0De/+oIszmaIYumelDgPhvJy+AA",
       "variants": [
         {
           "id": "wide",
           "width": 1280,
           "height": 720,
-          "bytes": 982360
+          "bytes": 2596572
         },
         {
           "id": "tall",
-          "width": 720,
-          "height": 960,
-          "bytes": 749284
+          "width": 704,
+          "height": 940,
+          "bytes": 1631318
         }
       ],
-      "posterBytes": 31244
+      "posterBytes": 41152
     },
     "bloom": {
       "source": {
-        "url": "https://assets.mixkit.co/videos/207/207-1080.mp4",
-        "title": "Coffee creamer swirling in coffee",
-        "credit": "Mixkit — https://mixkit.co/free-stock-video/coffee-creamer-swirling-in-coffee-207/",
+        "url": "https://assets.mixkit.co/videos/43941/43941-1080.mp4",
+        "title": "Pouring coffee in a cup",
+        "credit": "Mixkit — https://mixkit.co/free-stock-video/pouring-coffee-in-a-cup-43941/",
         "licence": "Mixkit Free Stock Video License (commercial use, no attribution required)"
       },
+      "role": "plate",
+      "note": "The default plate. Fifteen seconds that never stop moving.",
       "window": {
-        "startSeconds": 1.4,
-        "endSeconds": 11
+        "startSeconds": 0.2,
+        "endSeconds": 15.2,
+        "seconds": 15,
+        "fps": 9
       },
-      "frameCount": 72,
+      "frameCount": 135,
       "basePath": "/immersive/bloom",
-      "blurDataURL": "data:image/webp;base64,UklGRmgAAABXRUJQVlA4IFwAAABQBACdASoUAAsAPsFOoUqnpCMhsAgA8BgJZgCdMoR3ACq6LJW63crh1sEoAP7zHE7mu962Ysnd3wfO+c1pEtQkegdBDuJzuDIEYPAgxQ5KywAn38Gts94yHqgAAA==",
+      "blurDataURL": "data:image/webp;base64,UklGRnoAAABXRUJQVlA4IG4AAACwAwCdASoUAAsAPsFOoUqnpCMhsAgA8BgJZQCdACEdf1a4bOwXwAD+8XBLBTtnZFnVpMQZW+JBnFPExtv3UspNv/7n8GbjmN1gJf5Ta8G02fEizvKEsMKd7CLijZk45a52Uex4JruFweGiK+KAAA==",
       "variants": [
         {
           "id": "wide",
-          "width": 1152,
-          "height": 648,
-          "bytes": 452022
+          "width": 840,
+          "height": 472,
+          "bytes": 1013018
         },
         {
           "id": "tall",
-          "width": 648,
-          "height": 864,
-          "bytes": 320604
+          "width": 528,
+          "height": 716,
+          "bytes": 716340
         }
       ],
-      "posterBytes": 20664
+      "posterBytes": 34084
+    },
+    "espresso": {
+      "source": {
+        "url": "https://assets.mixkit.co/videos/3571/3571-1080.mp4",
+        "title": "Coffee maker serving an espresso",
+        "credit": "Mixkit — https://mixkit.co/free-stock-video/coffee-maker-serving-an-espresso-3571/",
+        "licence": "Mixkit Free Stock Video License (commercial use, no attribution required)"
+      },
+      "role": "plate",
+      "note": "Behind the menu: extraction, which is what a menu is a list of.",
+      "window": {
+        "startSeconds": 0.3,
+        "endSeconds": 12.2,
+        "seconds": 11.9,
+        "fps": 10
+      },
+      "frameCount": 119,
+      "basePath": "/immersive/espresso",
+      "blurDataURL": "data:image/webp;base64,UklGRn4AAABXRUJQVlA4IHIAAADQAwCdASoUAAsAPsFOoUqnpCMhsAgA8BgJZQAAW+wFIrVwk2WU7EAA/vECFVF6a6FbFaMvM/Y1fWHKvlBUSjLA+3OTLoi+O+SnL+Du+g3Gvg2oMXMsDNSttLMAzfnpAEznNa6VPM2tDPstFns/6qH5AAA=",
+      "variants": [
+        {
+          "id": "wide",
+          "width": 840,
+          "height": 472,
+          "bytes": 821936
+        },
+        {
+          "id": "tall",
+          "width": 528,
+          "height": 716,
+          "bytes": 891712
+        }
+      ],
+      "posterBytes": 43214
+    },
+    "latte": {
+      "source": {
+        "url": "https://assets.mixkit.co/videos/810/810-1080.mp4",
+        "title": "Latte art",
+        "credit": "Mixkit — https://mixkit.co/free-stock-video/latte-art-810/",
+        "licence": "Mixkit Free Stock Video License (commercial use, no attribution required)"
+      },
+      "role": "plate",
+      "note": "Behind ordering: the drink being finished.",
+      "window": {
+        "startSeconds": 4,
+        "endSeconds": 17.4,
+        "seconds": 13.4,
+        "fps": 11
+      },
+      "frameCount": 147,
+      "basePath": "/immersive/latte",
+      "blurDataURL": "data:image/webp;base64,UklGRngAAABXRUJQVlA4IGwAAAAwBACdASoUAAsAPsFOoUqnpCMhsAgA8BgJQBdgBFY3Ozg8WjdnL9yvaAAA/uTvk/ynMuOFkrooRsk9ER0rgiksVfFRHl7PPAj4tP6ydZxPz3W1Lk2+A7etH1w8f/reMHv7gd1FfRrteLfiAAA=",
+      "variants": [
+        {
+          "id": "wide",
+          "width": 840,
+          "height": 472,
+          "bytes": 767138
+        },
+        {
+          "id": "tall",
+          "width": 528,
+          "height": 716,
+          "bytes": 675980
+        }
+      ],
+      "posterBytes": 27308
+    },
+    "cascade": {
+      "source": {
+        "url": "https://assets.mixkit.co/videos/4982/4982-1080.mp4",
+        "title": "Coffee beans falling on a layer of more beans",
+        "credit": "Mixkit — https://mixkit.co/free-stock-video/coffee-beans-falling-on-a-layer-of-more-beans-4982/",
+        "licence": "Mixkit Free Stock Video License (commercial use, no attribution required)"
+      },
+      "role": "plate",
+      "note": "Behind the story: where the coffee comes from.",
+      "window": {
+        "startSeconds": 0.3,
+        "endSeconds": 14.3,
+        "seconds": 14,
+        "fps": 11
+      },
+      "frameCount": 154,
+      "basePath": "/immersive/cascade",
+      "blurDataURL": "data:image/webp;base64,UklGRoQAAABXRUJQVlA4IHgAAADQAwCdASoUAAsAPsFOoUqnpCMhsAgA8BgJZwAAYfrNfv/TIN49oIAA/uzRULdbuab6V2Gola9vCfQd0S+cv3Qb9I6sM0a2kaL/WYqExKl07rvd9xILEdomwsz8vyi85cd7olWNsMRXdc5NgSN6QfVDgeO+jaQAAAA=",
+      "variants": [
+        {
+          "id": "wide",
+          "width": 840,
+          "height": 472,
+          "bytes": 1130846
+        },
+        {
+          "id": "tall",
+          "width": 528,
+          "height": 716,
+          "bytes": 880140
+        }
+      ],
+      "posterBytes": 39928
+    },
+    "grind": {
+      "source": {
+        "url": "https://assets.mixkit.co/videos/4984/4984-1080.mp4",
+        "title": "Coffee powder being poured on the coffee maker filter",
+        "credit": "Mixkit — https://mixkit.co/free-stock-video/coffee-powder-being-poured-on-the-coffee-maker-filter-4984/",
+        "licence": "Mixkit Free Stock Video License (commercial use, no attribution required)"
+      },
+      "role": "plate",
+      "note": "Behind the journal: process, at the pace an essay is read.",
+      "window": {
+        "startSeconds": 0.3,
+        "endSeconds": 15.2,
+        "seconds": 14.9,
+        "fps": 9
+      },
+      "frameCount": 134,
+      "basePath": "/immersive/grind",
+      "blurDataURL": "data:image/webp;base64,UklGRnYAAABXRUJQVlA4IGoAAABQAwCdASoUAAsAPsFOoEqnpCMhsAgA8BgJYwAAKttuBC3AAAD+5DqW9sgEl0wNQhKJVXV0bLL7hkyGGo0yIZ6EgGgOZ6XCkezxAyUhXtywurmuiy7ge7IRMOxMXCpFSIkS396x1ibf3kAA",
+      "variants": [
+        {
+          "id": "wide",
+          "width": 840,
+          "height": 472,
+          "bytes": 917240
+        },
+        {
+          "id": "tall",
+          "width": 528,
+          "height": 716,
+          "bytes": 816070
+        }
+      ],
+      "posterBytes": 43194
+    },
+    "room": {
+      "source": {
+        "url": "https://assets.mixkit.co/videos/4350/4350-1080.mp4",
+        "title": "Urban coffee shop",
+        "credit": "Mixkit — https://mixkit.co/free-stock-video/urban-coffee-shop-4350/",
+        "licence": "Mixkit Free Stock Video License (commercial use, no attribution required)"
+      },
+      "role": "plate",
+      "note": "Behind visiting and events: the room, with people in it.",
+      "window": {
+        "startSeconds": 0.3,
+        "endSeconds": 10.6,
+        "seconds": 10.3,
+        "fps": 9
+      },
+      "frameCount": 93,
+      "basePath": "/immersive/room",
+      "blurDataURL": "data:image/webp;base64,UklGRoYAAABXRUJQVlA4IHoAAAAwBACdASoUAAsAPsFOoUqnpCMhsAgA8BgJQBOgBFlnWZJhXXl/+sw3XwAA/vGxAWRWK4NnvmBtfphy5bJVodzfXfRJnEVrea2QuT0hGWdQZ90iQFWVuMtjO8i5T0mg+P8/lRl1WTthfMt56SVWJly+j/v7SGhNWvYQAA==",
+      "variants": [
+        {
+          "id": "wide",
+          "width": 840,
+          "height": 472,
+          "bytes": 991764
+        },
+        {
+          "id": "tall",
+          "width": 528,
+          "height": 716,
+          "bytes": 745230
+        }
+      ],
+      "posterBytes": 65550
+    },
+    "steam": {
+      "source": {
+        "url": "https://assets.mixkit.co/videos/43935/43935-1080.mp4",
+        "title": "Demonstration video of a steaming cup of coffee",
+        "credit": "Mixkit — https://mixkit.co/free-stock-video/demonstration-video-of-a-steaming-cup-of-coffee-43935/",
+        "licence": "Mixkit Free Stock Video License (commercial use, no attribution required)"
+      },
+      "role": "plate",
+      "note": "Behind the gallery: almost nothing, which is what photographs need.",
+      "window": {
+        "startSeconds": 0.2,
+        "endSeconds": 10.2,
+        "seconds": 10,
+        "fps": 10
+      },
+      "frameCount": 100,
+      "basePath": "/immersive/steam",
+      "blurDataURL": "data:image/webp;base64,UklGRlgAAABXRUJQVlA4IEwAAADQAwCdASoUAAsAPsFOoEqnpCMhsAgA8BgJYwCdMoADTq7UndiWSogA/vKhKMNcNkajAoiXIvJlpBLq9oKusogETNAu4o6tHx8T4AAA",
+      "variants": [
+        {
+          "id": "wide",
+          "width": 840,
+          "height": 472,
+          "bytes": 422996
+        },
+        {
+          "id": "tall",
+          "width": 528,
+          "height": 716,
+          "bytes": 355120
+        }
+      ],
+      "posterBytes": 25498
     }
   }
 }
