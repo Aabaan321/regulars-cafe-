@@ -10,6 +10,7 @@ import {
 import { SequenceStage } from '@/components/immersive/sequence-stage';
 import { FramePoolReadout } from '@/components/immersive/frame-pool-readout';
 import { useClientValue } from '@/lib/hooks/use-client-value';
+import { trackScrollExtent, viewportHeight } from '@/lib/webgl/scroll-extent';
 import type { ResolvedThumbnail } from '@/lib/content/menu-display';
 
 /**
@@ -189,37 +190,76 @@ function DebugOverlay() {
   );
 }
 
-/** Reveals its children as the visitor scrolls through a slice of the page. */
+/**
+ * Reveals its children as their own section crosses the viewport.
+ *
+ * It measures itself. The previous version took hand-written `start`/`end`
+ * fractions of the *whole document* and, because the page is seven full
+ * screens tall and those numbers were tuned by eye, they did not line up with
+ * where the sections actually are. The result was chapters that faded out
+ * while their own section still filled the screen — two entirely blank
+ * screens on a phone, which is the worst possible thing for a tier whose
+ * argument is that it is the rich one.
+ *
+ * Deriving the window from the element's real position cannot drift, survives
+ * any amount of editing above it, and needs no numbers in the markup.
+ */
 export function ScrollReveal({
-  start,
-  end,
   children,
   className = '',
 }: {
-  start: number;
-  end: number;
   children: ReactNode;
   className?: string;
 }) {
-  const { progress } = useImmersive();
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+
+    const untrack = trackScrollExtent();
+
+    // Geometry, measured on change rather than per frame: a
+    // `getBoundingClientRect()` inside a scroll loop is a forced layout.
+    let top = 0;
+    let height = 0;
+    const measure = (): void => {
+      const box = node.getBoundingClientRect();
+      top = box.top + window.scrollY;
+      height = box.height;
+    };
+    measure();
+
+    const observer = new ResizeObserver(measure);
+    observer.observe(node);
+
     let frame = 0;
-    const tick = () => {
-      const node = ref.current;
-      if (node) {
-        const local = sectionProgress(progress.current, start, end);
-        // Ease in over the first third, hold, ease out over the last fifth.
-        const opacity = Math.min(1, Math.min(local / 0.28, (1 - local) / 0.18));
-        node.style.opacity = String(Math.max(0, opacity));
-        node.style.transform = `translate3d(0, ${(0.5 - local) * 36}px, 0)`;
-      }
+    const tick = (): void => {
       frame = requestAnimationFrame(tick);
+      const view = viewportHeight() || window.innerHeight;
+      // 0 as the block's top reaches the bottom of the viewport, 1 as its
+      // bottom clears the top.
+      const travel = height + view;
+      const local = travel > 0 ? (view - (top - window.scrollY)) / travel : 0;
+
+      /*
+       * In over the first third, hold through the middle, and fully out by
+       * 0.92 rather than 1.0 — a block that is still faintly visible as it
+       * passes under the sticky header reads as a rendering fault, not as a
+       * transition.
+       */
+      const opacity = Math.min(1, Math.min(local / 0.3, (0.92 - local) / 0.16));
+      node.style.opacity = String(Math.min(1, Math.max(0, opacity)));
+      node.style.transform = `translate3d(0, ${(0.5 - Math.min(1, Math.max(0, local))) * 30}px, 0)`;
     };
     frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, [progress, start, end]);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+      untrack();
+    };
+  }, []);
 
   return (
     <div ref={ref} className={className} style={{ willChange: 'opacity, transform' }}>

@@ -222,10 +222,16 @@ export function navFor(tier: TierId): readonly NavItem[] {
 /** Secondary links that live in the footer rather than the header. */
 export function footerNavFor(tier: TierId): readonly NavItem[] {
   if (tier === 'essential') return [{ key: 'gallery', path: '/gallery' }];
+  /*
+   * Loyalty and gift cards are sold in the tier matrix and are not built yet,
+   * so they are not linked. They were: every Tier 2 and Tier 3 footer pointed
+   * at /loyalty and /gift-cards, both of which 404, and Next prefetched them
+   * on hover so the console filled with errors before anyone even clicked.
+   * A link to nothing is worse than no link — put them back the moment the
+   * pages exist.
+   */
   return [
     { key: 'order', path: '/order' },
-    { key: 'loyalty', path: '/loyalty' },
-    { key: 'giftCards', path: '/gift-cards' },
     { key: 'gallery', path: '/gallery' },
   ];
 }

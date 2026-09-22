@@ -42,8 +42,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   // Pitch layer.
   push('/', 1.0, 'monthly');
-  push('/compare', 0.5, 'monthly');
-  push('/bespoke', 0.4, 'monthly');
+  // /compare and /bespoke are planned pitch-layer pages and are not built.
+  // Listed here they were two guaranteed 404s in the file we hand to search
+  // engines. They go back in with the pages.
 
   // Tier 1.
   push('/essential', 0.9, 'weekly');
@@ -67,8 +68,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
       ['/visit', 0.7, 'weekly'],
       ['/events', 0.7, 'weekly'],
       ['/journal', 0.7, 'weekly'],
-      ['/loyalty', 0.5, 'monthly'],
-      ['/gift-cards', 0.5, 'monthly'],
+      // No /loyalty or /gift-cards: both are sold in the tier matrix and
+      // neither is built, and submitting a 404 to a search engine is worse
+      // than not submitting it. Add them back with the pages.
     ];
 
     for (const [path, priority, freq] of pages) {

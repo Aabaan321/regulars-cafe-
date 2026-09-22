@@ -1,7 +1,9 @@
 import Link from 'next/link';
-import { ImmersiveNarrative, ScrollReveal } from '@/components/immersive/narrative';
+import { ImmersiveNarrative } from '@/components/immersive/narrative';
+import { Chapter, FarmTable, PourMeta, SpecList, StatGrid } from '@/components/immersive/chapters';
 import { Section } from '@/components/sections/section';
-import { MenuItemCard, type MenuItemView } from '@/components/menu/menu-item-card';
+import type { MenuItemView } from '@/components/menu/menu-item-card';
+import { SignatureShowcase } from '@/components/immersive/signature-showcase';
 import { FaqAccordion } from '@/components/sections/faq-accordion';
 import { JsonLd } from '@/components/seo/json-ld';
 import { faqs } from '@/lib/content/faq';
@@ -35,7 +37,11 @@ export function TierImmersiveHomePage({ tier, locale }: { tier: TierId; locale: 
     .filter((item) => item.badges.includes('signature'))
     .slice(0, 4)
     .map((item) => {
-      const image = item.imageKey ? getImage(item.imageKey) : undefined;
+      // Every plate in the showcase needs a photograph — a grid with one
+      // empty cell looks broken rather than sparse. The date latte has no
+      // shot of its own; `syrupPour` is literally the date syrup going in.
+      const key = item.imageKey ?? (item.id === 'date-cardamom-latte' ? 'syrupPour' : undefined);
+      const image = key ? getImage(key) : undefined;
       return {
         id: item.id,
         name: ar ? item.nameAr : item.name,
@@ -69,42 +75,122 @@ export function TierImmersiveHomePage({ tier, locale }: { tier: TierId; locale: 
     alt: room.alt,
   };
 
+  /*
+   * The four chapters.
+   *
+   * Each carries an `aside` as well as prose, because a chapter that is one
+   * paragraph centred in a full screen of photograph is a caption, not a
+   * page. Every fact in the asides is already asserted on the story page or
+   * in `lib/content/story.ts`; none of it is new, it was simply never used
+   * here.
+   */
   const chapters = [
     {
-      eyebrow: ar ? 'الفصل الأول' : 'One',
+      index: '01',
+      eyebrow: ar ? 'الوصول' : 'Arriving',
       heading: ar ? 'فنجان، وضوء.' : 'A cup, and some light.',
       body: ar
         ? 'كل شيء هنا يبدأ بهذا: خزف دافئ، وضوء شمالي من أحد عشر متراً من الزجاج، وقهوة حُمّصت في الغرفة المجاورة قبل أيام لا شهور.'
         : 'Everything here starts with this: warm ceramic, north light through eleven metres of glass, and coffee roasted in the next room days ago rather than months.',
-      start: 0.0,
-      end: 0.2,
+      aside: (
+        <SpecList
+          rows={
+            ar
+              ? ([
+                  ['الضوء', 'شمالي، حتى الثالثة عصراً'],
+                  ['الزجاج', '١١ متراً'],
+                  ['التحميص', 'في الغرفة المجاورة'],
+                  ['الافتتاح', 'أكتوبر ٢٠٢٤'],
+                ] as const)
+              : ([
+                  ['Light', 'North, until 3pm'],
+                  ['Glass', 'Eleven metres'],
+                  ['Roasted', 'In the next room'],
+                  ['Opened', 'October 2024'],
+                ] as const)
+          }
+        />
+      ),
     },
     {
-      eyebrow: ar ? 'الفصل الثاني' : 'Two',
+      index: '02',
+      eyebrow: ar ? 'الحرفة' : 'The craft',
       heading: ar ? 'السكب.' : 'The pour.',
       body: ar
         ? 'هذا سكبٌ حقيقي، صُوِّر مرة واحدة وقُطِّع إلى إطارات. مرّر الصفحة فينسكب، وارجع للأعلى فيرتدّ. الإيقاع لك — تماماً كما هو الحال عند البار، حيث لا شيء يُسكب قبل أن تكون جاهزاً.'
         : 'This is a real pour, filmed once and cut into frames. Scroll and it pours; scroll back and it un-pours. The pace is yours — which is also true at the bar, where nothing is poured until you are ready for it.',
-      start: 0.2,
-      end: 0.34,
+      aside: (
+        <PourMeta
+          labels={
+            ar
+              ? {
+                  frame: 'الإطار',
+                  source: 'لقطة واحدة · ٩٫٥ ثانية',
+                  note: 'الرقم أعلاه هو الإطار المرسوم خلف هذا النص الآن. لا يتقدّم من تلقاء نفسه — أنت من يحرّكه.',
+                }
+              : {
+                  frame: 'Frame',
+                  source: 'One shot · 9.5 seconds',
+                  note: 'That number is the frame being drawn behind this text right now. It does not advance on its own. You are moving it.',
+                }
+          }
+        />
+      ),
     },
     {
-      eyebrow: ar ? 'الفصل الثالث' : 'Three',
+      index: '03',
+      eyebrow: ar ? 'المصدر' : 'Sourcing',
       heading: ar ? 'رحلة الحبة.' : 'The bean journey.',
       body: ar
         ? 'أربع مزارع. اثنتان في قوجي بإثيوبيا، وواحدة في كاوكا بكولومبيا، ودفعة موسمية من كارناتاكا. نذكر أسماءها جميعاً، ونطبع ما دفعناه على الكيس.'
         : 'Four farms. Two in Guji in Ethiopia, one in Cauca in Colombia, and a seasonal lot from Karnataka. We name all of them, and we print what we paid on the bag.',
-      start: 0.34,
-      end: 0.56,
+      aside: (
+        <FarmTable
+          columns={ar ? ['المنشأ', 'المنطقة', 'الوصول'] : ['Origin', 'Region', 'Lands']}
+          rows={
+            ar
+              ? ([
+                  ['إثيوبيا', 'قوجي — تعاونية', 'مارس'],
+                  ['إثيوبيا', 'قوجي — دفعة ثانية', 'مارس'],
+                  ['كولومبيا', 'كاوكا', 'يوليو'],
+                  ['الهند', 'كارناتاكا — موسمية', 'مارس'],
+                ] as const)
+              : ([
+                  ['Ethiopia', 'Guji — cooperative', 'March'],
+                  ['Ethiopia', 'Guji — second lot', 'March'],
+                  ['Colombia', 'Cauca', 'July'],
+                  ['India', 'Karnataka — seasonal', 'March'],
+                ] as const)
+          }
+        />
+      ),
     },
     {
-      eyebrow: ar ? 'الفصل الرابع' : 'Four',
+      index: '04',
+      eyebrow: ar ? 'المكان' : 'The room',
       heading: ar ? 'المكان.' : 'The space.',
       body: ar
         ? 'مستودع لم يرغب به أحد، بسقف مرتفع يكفي لتهوية محمصة وضوء يكفي لكل شيء آخر. تسع طاولات في البداية. الآن ثماني عشرة.'
         : 'A warehouse nobody wanted, with a ceiling high enough to vent a roaster and light enough for everything else. Nine tables at first. Eighteen now.',
-      start: 0.56,
-      end: 0.74,
+      aside: (
+        <StatGrid
+          stats={
+            ar
+              ? ([
+                  { value: '١١', unit: 'م', label: 'زجاج مواجه للشمال' },
+                  { value: '٩→١٨', label: 'طاولات، منذ الافتتاح' },
+                  { value: '٥', unit: 'كجم', label: 'سعة المحمصة' },
+                  { value: '٤٨', unit: '°م', label: 'في الخارج، أغسطس' },
+                ] as const)
+              : ([
+                  { value: '11', unit: 'm', label: 'Of north-facing glass' },
+                  { value: '9→18', label: 'Tables, since opening' },
+                  { value: '5', unit: 'kg', label: 'Roaster capacity' },
+                  { value: '48', unit: '°C', label: 'Outside, in August' },
+                ] as const)
+          }
+        />
+      ),
     },
   ];
 
@@ -153,28 +239,15 @@ export function TierImmersiveHomePage({ tier, locale }: { tier: TierId; locale: 
 
       {/* ── Chapters. Real headings and paragraphs, in the document. ────── */}
       {chapters.map((chapter) => (
-        <section
-          key={chapter.heading}
-          className="relative flex min-h-[100svh] items-center"
-          aria-labelledby={`chapter-${chapter.start}`}
-        >
-          <div className="container-page">
-            <ScrollReveal start={chapter.start} end={chapter.end} className="max-w-[34rem]">
-              <p className="text-2xs mb-3 font-bold tracking-[0.22em] text-[#E3894A] uppercase">
-                {chapter.eyebrow}
-              </p>
-              <h2
-                id={`chapter-${chapter.start}`}
-                className="display-2 text-[#FFFBF4] [text-shadow:0_2px_24px_rgba(0,0,0,0.6)]"
-              >
-                {chapter.heading}
-              </h2>
-              <p className="mt-5 text-base leading-[1.7] text-[#E8DCCC] [text-shadow:0_1px_14px_rgba(0,0,0,0.65)]">
-                {chapter.body}
-              </p>
-            </ScrollReveal>
-          </div>
-        </section>
+        <Chapter
+          key={chapter.index}
+          index={chapter.index}
+          eyebrow={chapter.eyebrow}
+          heading={chapter.heading}
+          body={chapter.body}
+          aside={chapter.aside}
+          dir={ar ? 'rtl' : 'ltr'}
+        />
       ))}
 
       {/* ── Menu reveal ─────────────────────────────────────────────────── */}
@@ -182,23 +255,19 @@ export function TierImmersiveHomePage({ tier, locale }: { tier: TierId; locale: 
         <Section
           eyebrow={ar ? 'ما نُعرف به' : 'What we are known for'}
           heading={ar ? 'أربعة أطباق' : 'Four plates'}
-          action={
-            <Link href={tierHref(tier, '/menu', locale)} className="btn btn-secondary">
-              {dict.common.viewMenu}
-            </Link>
-          }
         >
-          <ul className="flex flex-col">
-            {signatures.map((item) => (
-              <MenuItemCard key={item.id} item={item} locale={locale} showImage />
-            ))}
-          </ul>
+          <SignatureShowcase
+            items={signatures}
+            locale={locale}
+            href={tierHref(tier, '/menu', locale)}
+            viewAllLabel={ar ? 'القائمة كاملة' : 'The whole menu'}
+          />
         </Section>
       </section>
 
       {/* ── Closing ─────────────────────────────────────────────────────── */}
       <section className="bg-bg relative">
-        <Section tone="subtle">
+        <Section>
           <figure className="mx-auto max-w-[44rem] text-center">
             <blockquote className="font-display text-ink text-3xl leading-[1.15] text-balance">
               “{ar ? founder.quoteAr : founder.quote}”

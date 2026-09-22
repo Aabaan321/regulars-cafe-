@@ -85,14 +85,8 @@ export function TierHomePage({ tier, locale }: { tier: TierId; locale: Locale })
       href: tierHref(tier, '/events', locale),
       cta: dict.nav.events,
     },
-    {
-      title: ar ? 'بطاقة الأختام' : 'The stamp card',
-      body: ar
-        ? 'تسع قهوات والعاشرة علينا. بلا تطبيق وبلا بطاقة.'
-        : 'Nine coffees, the tenth is ours. No app, no plastic card.',
-      href: tierHref(tier, '/loyalty', locale),
-      cta: dict.nav.loyalty,
-    },
+    // The stamp-card promo lived here and pointed at /loyalty, which does not
+    // exist yet. Restore it with the page rather than advertising a 404.
   ];
 
   return (
