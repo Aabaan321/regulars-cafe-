@@ -1,14 +1,14 @@
 'use client';
 
-import dynamic from 'next/dynamic';
 import Image from 'next/image';
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import {
   ImmersiveProvider,
   sectionProgress,
   useImmersive,
 } from '@/components/immersive/scroll-context';
 import { SequenceStage } from '@/components/immersive/sequence-stage';
+import { FramePoolReadout } from '@/components/immersive/frame-pool-readout';
 import { useClientValue } from '@/lib/hooks/use-client-value';
 import type { ResolvedThumbnail } from '@/lib/content/menu-display';
 
@@ -21,29 +21,18 @@ import type { ResolvedThumbnail } from '@/lib/content/menu-display';
  * still, the page is still a complete, readable article about the café —
  * which is what keeps the SEO of Tier 3 identical to Tier 1 rather than worse.
  *
- * Two kinds of layer, each doing the job it is actually good at:
+ * Everything here is real footage, scrubbed frame by frame against the
+ * scroll. Photography beats simulation for something the visitor has held in
+ * their hand ten thousand times; a shader cannot fake crema and it is obvious
+ * when it tries.
  *
- *  1. **The filmed sequences** — real footage, scrubbed frame by frame
- *     against the scroll. Photography beats simulation for something the
- *     visitor has held in their hand ten thousand times; a shader cannot fake
- *     crema and it is obvious when it tries.
- *  2. **The bean field** — genuinely procedural, genuinely WebGL, because a
- *     few hundred beans drifting through real depth is something no film can
- *     give you and no sequence of stills can scrub.
- *
- * The WebGL layer is loaded with `next/dynamic` *and* only mounted once the
- * visitor is approaching the chapter that uses it, so three.js is neither in
- * the server bundle nor on the boot path, and a visitor who never scrolls
- * that far never pays for it at all.
+ * There used to be a WebGL layer here as well — a few hundred simulated beans
+ * drifting through depth in front of the filmed plate. It is gone. It never
+ * looked like coffee, it put three.js and a GPU context on a page that is
+ * already asking a phone to composite two full-bleed canvases, and "real
+ * footage plus obviously fake beans" reads as worse than real footage alone.
+ * Filmed beans fall in front of the lens on the story page instead.
  */
-
-const ImmersiveStage = dynamic(
-  () => import('@/components/immersive/stage').then((m) => m.ImmersiveStage),
-  { ssr: false },
-);
-
-/** Global scroll position at which three.js is worth fetching. */
-const WEBGL_ARMS_AT = 0.2;
 
 export function ImmersiveNarrative({
   children,
@@ -72,9 +61,9 @@ function NarrativeBody({
   dir: 'ltr' | 'rtl';
   closingImage: ResolvedThumbnail;
 }) {
-  const { profile, debug } = useImmersive();
-  // `profile` and `debug` are both client-only determinations; rendering
-  // either before hydration is a server/client mismatch (React #418).
+  const { debug } = useImmersive();
+  // `debug` is a client-only determination; rendering it before hydration is
+  // a server/client mismatch (React #418).
   const mounted = useClientValue(() => true, false);
 
   return (
@@ -121,40 +110,11 @@ function NarrativeBody({
         scrim="even"
       />
 
-      {mounted && profile.mode === 'webgl' ? <ArmedStage /> : null}
       {mounted && debug ? <DebugOverlay /> : null}
 
       {children}
     </>
   );
-}
-
-/**
- * Holds three.js back until the visitor is most of the way through the pour.
- *
- * Roughly 380KB of JavaScript and a GPU context, fetched on a scroll gesture
- * the visitor has already committed to, rather than during the two seconds
- * where every byte is competing with the page they came to read.
- */
-function ArmedStage() {
-  const { progress } = useImmersive();
-  const [armed, setArmed] = useState(false);
-
-  useEffect(() => {
-    if (armed) return;
-    let frame = 0;
-    const tick = (): void => {
-      if (progress.current >= WEBGL_ARMS_AT) {
-        setArmed(true);
-        return;
-      }
-      frame = requestAnimationFrame(tick);
-    };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, [armed, progress]);
-
-  return armed ? <ImmersiveStage /> : null;
 }
 
 /**
@@ -224,8 +184,7 @@ function DebugOverlay() {
         mode <strong>{profile.mode}</strong> · tier {profile.tier} · dpr≤{profile.maxDpr}
       </div>
       <div className="text-white/60">{profile.reason}</div>
-      <div id="immersive-debug-fps">webgl idle</div>
-      <div id="immersive-debug-frames">sequence idle</div>
+      <FramePoolReadout className="text-white/70" />
     </div>
   );
 }

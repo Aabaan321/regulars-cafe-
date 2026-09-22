@@ -11,6 +11,7 @@ import {
 } from 'react';
 import Lenis from 'lenis';
 import { detectDeviceProfile, debugEnabled, type DeviceProfile } from '@/lib/webgl/capabilities';
+import { scrollExtent, scrollProgress, trackScrollExtent } from '@/lib/webgl/scroll-extent';
 
 /**
  * Smooth scrolling, and the single source of scroll progress.
@@ -80,8 +81,9 @@ export function ImmersiveProvider({ children }: { children: ReactNode }) {
     };
     frame = requestAnimationFrame(loop);
 
+    const untrack = trackScrollExtent();
     const onScroll = () => {
-      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const max = scrollExtent();
       scrollY.current = lenis.scroll;
       progress.current = max > 0 ? Math.min(1, Math.max(0, lenis.scroll / max)) : 0;
       velocity.current = lenis.velocity;
@@ -91,6 +93,7 @@ export function ImmersiveProvider({ children }: { children: ReactNode }) {
 
     return () => {
       cancelAnimationFrame(frame);
+      untrack();
       lenis.destroy();
     };
   }, [profile.mode, profile.reducedMotion]);
@@ -99,10 +102,10 @@ export function ImmersiveProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (profile.mode === 'webgl' && !profile.reducedMotion) return;
 
+    const untrack = trackScrollExtent();
     const onScroll = () => {
-      const max = document.documentElement.scrollHeight - window.innerHeight;
       scrollY.current = window.scrollY;
-      progress.current = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+      progress.current = scrollProgress();
     };
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -110,6 +113,7 @@ export function ImmersiveProvider({ children }: { children: ReactNode }) {
     return () => {
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onScroll);
+      untrack();
     };
   }, [profile.mode, profile.reducedMotion]);
 

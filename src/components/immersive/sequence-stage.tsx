@@ -131,6 +131,7 @@ export function SequenceStage({
           label={sequence}
           smoothedInput={profile.mode !== 'fallback'}
           deferUntil={deferUntil}
+          fade={fade}
           // Plate-role footage is built soft and small; a retina backing
           // store would be spent resolving a blur.
           maxDpr={spec.role === 'plate' ? SCRUB_DPR_PLATE : SCRUB_DPR_HERO}
@@ -141,6 +142,14 @@ export function SequenceStage({
     </SequenceLayer>
   );
 }
+
+/**
+ * How far either side of its visible range a layer stays "active".
+ *
+ * Wide enough that a layer has filled before it is needed, narrow enough that
+ * three layers are never all holding frames at once.
+ */
+const ACTIVE_MARGIN = 0.12;
 
 /** The fixed, full-bleed box, faded by scroll position. */
 function SequenceLayer({
@@ -203,6 +212,7 @@ function SequenceCanvas({
   smoothedInput,
   deferUntil,
   maxDpr,
+  fade,
 }: {
   basePath: string;
   frameCount: number;
@@ -214,6 +224,7 @@ function SequenceCanvas({
   smoothedInput: boolean;
   deferUntil: number;
   maxDpr: number;
+  fade?: readonly [number, number, number, number];
 }) {
   const { progress, setReady } = useImmersive();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -242,6 +253,7 @@ function SequenceCanvas({
     painter.resize();
 
     let revealed = false;
+    let active = true;
     let frame = 0;
     let previous = 0;
 
@@ -257,6 +269,23 @@ function SequenceCanvas({
 
       const global = progress.current;
       if (!fetching && global >= deferUntil) fetchNow();
+
+      /*
+       * Tell the shared frame pool whether this layer is worth holding frames
+       * for. The home page runs three sequences across disjoint stretches of
+       * the scroll, so at any moment two of them are off screen; saying so is
+       * what lets the one you are looking at have the whole allowance instead
+       * of a third of it.
+       *
+       * The window is widened either side of the visible range so a layer is
+       * already filling before it fades up, rather than arriving empty.
+       */
+      const nowActive =
+        !fade || (global >= fade[0] - ACTIVE_MARGIN && global <= fade[3] + ACTIVE_MARGIN);
+      if (nowActive !== active) {
+        active = nowActive;
+        sequence.setActive(active);
+      }
 
       const local = sectionProgress(global, scrubStart, scrubEnd);
 
@@ -289,10 +318,7 @@ function SequenceCanvas({
     const fetchNow = (): void => {
       if (fetching) return;
       fetching = true;
-      sequence.start(({ loaded, total }) => {
-        const node = document.getElementById('immersive-debug-frames');
-        if (node) node.textContent = `${label} ${loaded}/${total} · ${variant}`;
-      });
+      sequence.start();
     };
 
     const begin = (): void => {
@@ -333,6 +359,7 @@ function SequenceCanvas({
     smoothedInput,
     deferUntil,
     maxDpr,
+    fade,
     progress,
     setReady,
   ]);

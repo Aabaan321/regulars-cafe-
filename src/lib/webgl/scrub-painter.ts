@@ -1,6 +1,6 @@
 'use client';
 
-import type { FrameSequence } from '@/lib/webgl/frame-sequence';
+import type { Frame, FrameSequence } from '@/lib/webgl/frame-sequence';
 
 /**
  * Paints a scroll-scrubbed sequence onto a canvas.
@@ -70,6 +70,20 @@ export const SCRUB_EASE_SMOOTHED = 0.5;
 export const SCRUB_DPR_HERO = 2;
 export const SCRUB_DPR_PLATE = 1.25;
 
+/**
+ * Height change, in CSS pixels, below which the backing store is left alone.
+ *
+ * A phone's URL bar slides in and out as you scroll, and on iOS that resizes
+ * a `position: fixed` layer by 60–100px repeatedly *during* the scroll. Every
+ * one of those resizes reallocates the canvas, which clears it — so the
+ * background flashed black on exactly the gesture it exists to respond to.
+ *
+ * The buffer is cover-drawn, so being a little taller than the element costs
+ * nothing visible. 140px absorbs every mobile browser's chrome while still
+ * reacting to a genuine layout change like a rotation or a desktop resize.
+ */
+const RESIZE_DEADBAND = 140;
+
 /** Closer than this to the target, in frames, and it is simply there. */
 const SNAP_EPSILON = 0.004;
 
@@ -87,6 +101,13 @@ export class ScrubPainter {
   private position: number;
   private drawnKey = '';
   private painted = false;
+  /** What is currently on the canvas, so a resize can put it back. */
+  private lastPaint: {
+    a: Frame;
+    b: Frame | null;
+    blend: number;
+    scale: number;
+  } | null = null;
 
   private readonly ease: number;
   private readonly maxDpr: number;
@@ -115,12 +136,44 @@ export class ScrubPainter {
     return this.painted;
   }
 
-  /** Re-reads the backing store at the current device pixel ratio. */
+  /**
+   * Re-reads the backing store at the current device pixel ratio.
+   *
+   * Reallocating a canvas clears it, so this does as little of that as it can
+   * get away with: a width change or a large height change only, and it
+   * repaints the last frame synchronously rather than leaving the visitor a
+   * blank rectangle until the next animation frame.
+   */
   resize(): void {
     const dpr = Math.min(window.devicePixelRatio || 1, this.maxDpr);
-    this.canvas.width = Math.max(1, Math.round(this.canvas.clientWidth * dpr));
-    this.canvas.height = Math.max(1, Math.round(this.canvas.clientHeight * dpr));
-    this.drawnKey = ''; // the old buffer is gone; force a repaint into the new one
+    const cssWidth = this.canvas.clientWidth;
+    const cssHeight = this.canvas.clientHeight;
+    if (cssWidth <= 0 || cssHeight <= 0) return;
+
+    const width = Math.max(1, Math.round(cssWidth * dpr));
+    const height = Math.max(1, Math.round(cssHeight * dpr));
+
+    const sameWidth = width === this.canvas.width;
+    const closeEnough = Math.abs(height - this.canvas.height) < RESIZE_DEADBAND * dpr;
+    if (sameWidth && closeEnough && this.painted) return;
+
+    this.canvas.width = width;
+    this.canvas.height = height;
+    this.drawnKey = '';
+    this.repaint();
+  }
+
+  /** Redraws the last composited pair into a freshly cleared buffer. */
+  private repaint(): void {
+    const last = this.lastPaint;
+    if (!last) return;
+    this.context.globalAlpha = 1;
+    this.paint(last.a, last.scale);
+    if (last.b && last.blend > BLEND_FLOOR) {
+      this.context.globalAlpha = last.blend;
+      this.paint(last.b, last.scale);
+      this.context.globalAlpha = 1;
+    }
   }
 
   /**
@@ -158,13 +211,8 @@ export class ScrubPainter {
     if (key === this.drawnKey) return;
     this.drawnKey = key;
 
-    this.context.globalAlpha = 1;
-    this.paint(pair.a, scale);
-    if (pair.b && pair.blend > BLEND_FLOOR) {
-      this.context.globalAlpha = pair.blend;
-      this.paint(pair.b, scale);
-      this.context.globalAlpha = 1;
-    }
+    this.lastPaint = { a: pair.a, b: pair.b, blend: pair.blend, scale };
+    this.repaint();
     this.painted = true;
   }
 
@@ -191,9 +239,9 @@ export class ScrubPainter {
    * frame rate, which is what a half-loaded sequence should look like.
    */
   private resolve(position: number): {
-    a: HTMLImageElement;
+    a: Frame;
     aIndex: number;
-    b: HTMLImageElement | null;
+    b: Frame | null;
     bIndex: number;
     blend: number;
   } | null {
@@ -203,19 +251,19 @@ export class ScrubPainter {
 
     if (a && b && b.index > a.index) {
       return {
-        a: a.image,
+        a: a.frame,
         aIndex: a.index,
-        b: b.image,
+        b: b.frame,
         bIndex: b.index,
         blend: (position - a.index) / (b.index - a.index),
       };
     }
     const one = a ?? b;
-    if (one) return { a: one.image, aIndex: one.index, b: null, bIndex: -1, blend: 0 };
+    if (one) return { a: one.frame, aIndex: one.index, b: null, bIndex: -1, blend: 0 };
 
     const fallback = this.sequence.nearest(Math.round(position));
     if (!fallback) return null;
-    return { a: fallback.image, aIndex: fallback.index, b: null, bIndex: -1, blend: 0 };
+    return { a: fallback.frame, aIndex: fallback.index, b: null, bIndex: -1, blend: 0 };
   }
 
   /** Roughly three times the spacing this device's budget implies. */
@@ -224,14 +272,14 @@ export class ScrubPainter {
     return Math.max(2, Math.ceil(this.sequence.count / budget) * 3);
   }
 
-  /** Cover-fits an image into the backing store, centred, at `scale`. */
-  private paint(image: HTMLImageElement, scale: number): void {
+  /** Cover-fits a frame into the backing store, centred, at `scale`. */
+  private paint(frame: Frame, scale: number): void {
     const { width, height } = this.canvas;
-    const cover = Math.max(width / image.naturalWidth, height / image.naturalHeight) * scale;
-    const drawWidth = image.naturalWidth * cover;
-    const drawHeight = image.naturalHeight * cover;
+    const cover = Math.max(width / frame.width, height / frame.height) * scale;
+    const drawWidth = frame.width * cover;
+    const drawHeight = frame.height * cover;
     this.context.drawImage(
-      image,
+      frame.source,
       (width - drawWidth) / 2,
       (height - drawHeight) / 2,
       drawWidth,

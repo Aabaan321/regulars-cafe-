@@ -5,7 +5,10 @@ import { useEffect, useRef } from 'react';
 import { FrameSequence } from '@/lib/webgl/frame-sequence';
 import { ScrubPainter, SCRUB_DPR_PLATE } from '@/lib/webgl/scrub-painter';
 import { detectDeviceProfile } from '@/lib/webgl/capabilities';
+import { scrollProgress, trackScrollExtent } from '@/lib/webgl/scroll-extent';
 import { useClientValue } from '@/lib/hooks/use-client-value';
+import { FramePoolReadout } from '@/components/immersive/frame-pool-readout';
+import { debugEnabled } from '@/lib/webgl/capabilities';
 import manifest from '@/lib/content/pour-sequence.json';
 
 /**
@@ -112,6 +115,7 @@ function ScrubbedAtmosphere({
 }) {
   const spec = sequences[sequence];
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const debug = useClientValue(() => debugEnabled(), false);
   const variant = useClientValue<'wide' | 'tall'>(
     () => (window.innerWidth / window.innerHeight < 0.9 ? 'tall' : 'wide'),
     'wide',
@@ -128,10 +132,10 @@ function ScrubbedAtmosphere({
     const context = canvas.getContext('2d', { alpha: false });
     if (!context) return;
 
-    const scrollProgress = (): number => {
-      const max = document.documentElement.scrollHeight - window.innerHeight;
-      return max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
-    };
+    // Cached, and re-measured only when the page could actually have changed
+    // height. Asking the layout engine for `scrollHeight` once per frame is a
+    // forced synchronous layout sixty times a second.
+    const untrack = trackScrollExtent();
 
     const frames = new FrameSequence(
       spec.basePath,
@@ -197,9 +201,10 @@ function ScrubbedAtmosphere({
       cancelAnimationFrame(frame);
       cancelIdle(idle);
       observer.disconnect();
+      untrack();
       frames.destroy();
     };
-  }, [mounted, variant, spec]);
+  }, [mounted, variant, spec, sequence]);
 
   return (
     <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
@@ -218,6 +223,9 @@ function ScrubbedAtmosphere({
         className="absolute inset-0 size-full opacity-0 transition-opacity duration-700"
       />
       <Veil dir={dir} strong />
+      {debug ? (
+        <FramePoolReadout className="pointer-events-none fixed bottom-3 left-3 z-[70] rounded bg-black/80 px-3 py-2 font-mono text-[11px] text-white/80" />
+      ) : null}
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { FrameSequence } from '@/lib/webgl/frame-sequence';
 import { ScrubPainter, SCRUB_DPR_PLATE } from '@/lib/webgl/scrub-painter';
+import { trackScrollExtent, viewportHeight } from '@/lib/webgl/scroll-extent';
 import { detectDeviceProfile } from '@/lib/webgl/capabilities';
 import { useClientValue } from '@/lib/hooks/use-client-value';
 import manifest from '@/lib/content/pour-sequence.json';
@@ -83,14 +84,34 @@ export function BeanBand({
 
     // Plate footage, built soft — a retina backing store would be spent
     // resolving a blur.
+    const untrack = trackScrollExtent();
     const painter = new ScrubPainter(canvas, sequence, context, { maxDpr: SCRUB_DPR_PLATE });
     let running = false;
     let started = false;
     let frame = 0;
     let previous = 0;
 
-    const resizeObserver = new ResizeObserver(() => painter.resize());
+    /*
+     * The band's geometry, measured when it changes rather than every frame.
+     * `getBoundingClientRect()` inside a scroll loop is a forced layout, and
+     * the only part of it that actually moves is the scroll offset — which
+     * `window.scrollY` already reports for free.
+     */
+    let bandTop = 0;
+    let bandHeight = 0;
+    const measure = (): void => {
+      const box = section.getBoundingClientRect();
+      bandTop = box.top + window.scrollY;
+      bandHeight = box.height;
+    };
+    measure();
+
+    const resizeObserver = new ResizeObserver(() => {
+      painter.resize();
+      measure();
+    });
     resizeObserver.observe(canvas);
+    resizeObserver.observe(section);
     painter.resize();
 
     const tick = (now: number): void => {
@@ -105,9 +126,10 @@ export function BeanBand({
 
       // The band's own progress: 0 as its top reaches the bottom of the
       // viewport, 1 as its bottom clears the top.
-      const box = section.getBoundingClientRect();
-      const travel = box.height + window.innerHeight;
-      const local = Math.min(1, Math.max(0, (window.innerHeight - box.top) / travel));
+      const view = viewportHeight() || window.innerHeight;
+      const top = bandTop - window.scrollY;
+      const travel = bandHeight + view;
+      const local = travel > 0 ? Math.min(1, Math.max(0, (view - top) / travel)) : 0;
 
       painter.render(local, 1, delta);
       if (painter.hasPainted) canvas.style.opacity = '1';
@@ -118,6 +140,8 @@ export function BeanBand({
     const visibility = new IntersectionObserver(
       ([entry]) => {
         running = entry?.isIntersecting ?? false;
+        // Off screen, the band gives its frames back to the page's pool.
+        sequence.setActive(running);
         if (running && !started) {
           started = true;
           sequence.start();
@@ -133,6 +157,7 @@ export function BeanBand({
       cancelAnimationFrame(frame);
       resizeObserver.disconnect();
       visibility.disconnect();
+      untrack();
       sequence.destroy();
     };
   }, [mounted, variant]);
